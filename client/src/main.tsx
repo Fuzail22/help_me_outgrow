@@ -6,7 +6,7 @@ import App from './App.tsx'
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
-    .register('/sw.js',{type:"module"}) // Path to the Service Worker file
+    .register('./sw.js',{type:"module"}) 
     .then((registration) => {
       console.log('Service Worker registered with scope:', registration.scope);
     })
