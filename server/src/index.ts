@@ -31,7 +31,16 @@ console.log({ subscription });
 sendNotification(
   subscription,
   JSON.stringify({
-    title: "example",
-    body: "helo i am here",
+    title: "New Offer!",
+    body: "Click to get a 50% discount!",
+    data: {
+      url: "https://www.google.com/",
+    },
+    actions: [
+      {
+        action: "open_url",
+        title: "Open Now",
+      },
+    ],
   })
 );

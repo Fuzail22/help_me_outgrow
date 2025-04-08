@@ -8,27 +8,30 @@ self.addEventListener("activate", (event) => {
 });
 self.addEventListener("message", (e) => {
   console.log("message event received");
-  if (e.data && e.data.type == show_notifications) {
+  if (e.data && e.data.type == "show_notifications") {
     const { title, body } = e.data;
-    // setTimeout(
-    //   () =>
     self.registration.showNotification(title, {
       body,
       icon: "vite.svg",
       image: "vite.svg",
     });
-    // ,
-    //   10000
-    // );
+  }
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  if (event.action === "open_url") {
+    clients.openWindow(event.notification.data.url);
   }
 });
 
 self.addEventListener("push", (event) => {
   console.log("pushed");
   const data = event.data.json();
+  const { title, ...rest } = data;
   console.log({ data });
-  self.registration.showNotification(data.title, {
-    body: data.body,
+  self.registration.showNotification(title, {
+    ...rest,
     icon: "vite.svg",
     image: "vite.svg",
   });
