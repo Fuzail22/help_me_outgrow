@@ -1,10 +1,10 @@
-import { Motifications } from "../types";
+import { Notifications } from "../types";
 
 function snedMSGToServiceWorker(title: string, body: string) {
   const controller = navigator.serviceWorker.controller;
   if (controller) {
     controller.postMessage({
-      type: Motifications.SHOW_NOTIFICATIONS,
+      type: Notifications.SHOW_NOTIFICATIONS,
       title,
       body,
     });

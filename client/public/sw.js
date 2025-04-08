@@ -1,5 +1,3 @@
-// <reference lib="webworker" />
-
 self.addEventListener("install", (event) => {
   console.log("Service Worker installing.");
   self.skipWaiting(); // Activate the Service Worker immediately
@@ -8,10 +6,9 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   console.log("Service Worker activating.");
 });
-import { Motifications } from "../src/types";
 self.addEventListener("message", (e) => {
   console.log("message event received");
-  if (e.data && e.data.type == Motifications.SHOW_NOTIFICATIONS) {
+  if (e.data && e.data.type == show_notifications) {
     const { title, body } = e.data;
     // setTimeout(
     //   () =>
