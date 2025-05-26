@@ -1,0 +1,29 @@
+{
+  "name": "help_me_server",
+  "version": "0.5.0",
+  "description": "web based notification service, initiated to help people recover or heal to positive affirmations",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "server"
+  ],
+  "author": "fuzail22",
+  "license": "ISC",
+  "dependencies": {
+    "cron": "^4.1.4",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.12.2",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.13",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
