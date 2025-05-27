@@ -1,5 +1,9 @@
-// import { InferSchemaType } from "mongoose";
-// import { TopicsSchema } from "../data/models/topics.model";
+import { InferSchemaType } from "mongoose";
+import {
+  topicsDataSchema,
+  topicsSchema,
+} from "../repository/models/topics.model";
+import { notificationEventsSchema } from "../repository/models/events.model";
 
 export enum TopicType {
   RELATIONSHIP = "relationship",
@@ -16,4 +20,8 @@ export enum Days {
   SATURDAY = "saturday",
   SUNDAY = "sunday",
 }
-// export type Topic = InferSchemaType<typeof TopicsSchema>;
+export type Topic = InferSchemaType<typeof topicsSchema>;
+export type TopicData = InferSchemaType<typeof topicsDataSchema>;
+export type NotificationEvent = InferSchemaType<
+  typeof notificationEventsSchema
+>;

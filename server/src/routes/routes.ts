@@ -3,11 +3,13 @@
 
 import express from "express";
 import { topicsRouter } from "./topics.route";
+import { eventsRouter } from "./events.route";
+import { userRouter } from "./users.route";
 
 const router = express.Router();
-// router.use("/events", eventsRoute);
-// const router = require("express").Router();
-// const topicsRoute = require("./topics.route.ts");
+
 router.use("/topics", topicsRouter);
+router.use("/events", eventsRouter);
+router.use("/users", userRouter);
 
 export { router };
