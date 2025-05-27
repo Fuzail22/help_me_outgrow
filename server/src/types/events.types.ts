@@ -2,8 +2,8 @@ import { InferSchemaType } from "mongoose";
 import {
   topicsDataSchema,
   topicsSchema,
-} from "../repository/models/topics.model";
-import { notificationEventsSchema } from "../repository/models/events.model";
+} from "../repositories/models/topics.model";
+import { notificationEventsSchema } from "../repositories/models/events.model";
 
 export enum TopicType {
   RELATIONSHIP = "relationship",

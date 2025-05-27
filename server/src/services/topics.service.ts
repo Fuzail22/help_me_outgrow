@@ -1,6 +1,6 @@
 import { ObjectId } from "mongoose";
-import { Topics } from "../repository/models/topics.model";
-import { topicsRepository } from "../repository/topics.repository";
+import { Topics } from "../repositories/models/topics.model";
+import { topicsRepository } from "../repositories/topics.repository";
 import { Topic, TopicData } from "../types/events.types";
 import { Result } from "../types/generic.types.";
 

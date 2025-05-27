@@ -2,7 +2,7 @@
  * @description To send notification to the specified endpoint
  */
 
-import { schedulesRepository } from "../repository/schedules.repostiory";
+import { schedulesRepository } from "../repositories/schedules.repostiory";
 import { NotificationEvent } from "../types/events.types";
 import { getUserSubcriptionEndpoint } from "./users.service";
 
