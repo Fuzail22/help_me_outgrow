@@ -5,7 +5,10 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:unit": "jest --testMatch \"**/__tests__/unit/**/*.test.ts\"",
+    "test:integration": "jest --testRegex \".*\\.int\\.test\\.ts$\"",
+    "test:watch": "jest --watch"
   },
   "keywords": [
     "api",
@@ -22,7 +25,12 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.13.13",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.0.5",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.1",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }

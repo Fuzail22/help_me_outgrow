@@ -1,6 +1,8 @@
+import { Schedules } from "../types/events.types";
+
 class SchedulesRepository {
-  insertManySchedules() {}
-  findScheduleByTimeStamp() {}
+  async insertManySchedules(schedules: Schedules[]) {}
+  async findScheduleByTimeStamp() {}
   deleteScheduleByTimeRange() {}
 }
 
