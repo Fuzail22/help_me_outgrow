@@ -21,6 +21,17 @@ const signIn = async (app: any) => {
 };
 
 describe('thin backend', () => {
+  it('allows credentialed cross-origin calls from the app origin only', async () => {
+    const { app } = make();
+    const pre = await request(app).options('/auth/google').set('origin', ORIGIN).set('access-control-request-method', 'POST').expect(204);
+    expect(pre.headers['access-control-allow-origin']).toBe(ORIGIN);
+    expect(pre.headers['access-control-allow-credentials']).toBe('true');
+    const ok = await request(app).get('/auth/healthz').set('origin', ORIGIN).expect(200);
+    expect(ok.headers['access-control-allow-origin']).toBe(ORIGIN);
+    const other = await request(app).get('/auth/healthz').set('origin', 'https://evil.example.test').expect(200);
+    expect(other.headers['access-control-allow-origin']).toBeUndefined();
+    await request(app).post('/auth/google').set('origin', 'https://evil.example.test').send({ credential: 'valid-google-credential-token' }).expect(403);
+  });
   it('signs in with a verified Google credential and sets an httpOnly, SameSite=Lax, Secure session cookie', async () => {
     const { app } = make();
     const s = await signIn(app);

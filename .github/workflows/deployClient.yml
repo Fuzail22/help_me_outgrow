@@ -19,6 +19,7 @@ jobs:
         run: npm run build
         env:
           VITE_PLATFORM_API_URL: ${{ vars.VITE_PLATFORM_API_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_PUBLISHABLE_KEY: ${{ vars.VITE_PUBLISHABLE_KEY }}
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
       - name: Deploy

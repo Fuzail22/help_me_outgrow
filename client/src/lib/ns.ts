@@ -2,8 +2,11 @@ import { createClient } from '@notification-service/sdk';
 
 export interface User { id: string; name: string; email: string }
 
+// Empty in local development (a dev proxy serves /auth on the same origin); the api's own address in production.
+const API = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+
 async function api<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const res = await fetch(path, { method, credentials: 'same-origin', headers: body ? { 'content-type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  const res = await fetch(API + path, { method, credentials: API ? 'include' : 'same-origin', headers: body ? { 'content-type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
   if (res.status === 204) return null as T;
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw Object.assign(new Error(data.error?.message ?? 'Request failed'), { status: res.status, code: data.error?.code });
