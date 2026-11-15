@@ -24,6 +24,19 @@ export function createApp(deps: Deps) {
   app.disable('x-powered-by');
   app.use(express.json({ limit: '16kb' }));
 
+  // The app is served from another origin (outgrow.htsta.com) than this api (api.outgrow.htsta.com).
+  // Same site, so the Lax cookie is sent; browsers still need explicit CORS permission for credentials.
+  app.use((req, res, next) => {
+    if (req.header('origin') === config.appOrigin) {
+      res.set({ 'Access-Control-Allow-Origin': config.appOrigin, 'Access-Control-Allow-Credentials': 'true', Vary: 'Origin' });
+      if (req.method === 'OPTIONS') {
+        res.set({ 'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS', 'Access-Control-Allow-Headers': 'content-type', 'Access-Control-Max-Age': '600' });
+        return res.status(204).end();
+      }
+    }
+    next();
+  });
+
   // The session cookie is SameSite=Lax; state-changing requests must also come from our own origin.
   app.use((req, _res, next) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
