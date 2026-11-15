@@ -1,0 +1,6 @@
+[
+  { "slug": "loss", "title": "Loss", "description": "For when someone or something you loved is gone.", "sensitive": true, "file": "topics/loss.csv" },
+  { "slug": "break-up", "title": "After a break-up", "description": "For the weeks after a relationship ends.", "sensitive": false, "file": "topics/break-up.csv" },
+  { "slug": "burnt-out", "title": "Burnt out", "description": "For when work or caring for others has emptied you.", "sensitive": false, "file": "topics/burnt-out.csv" },
+  { "slug": "low-mood", "title": "Low mood", "description": "For a stretch of heavy, grey days.", "sensitive": true, "file": "topics/low-mood.csv" }
+]

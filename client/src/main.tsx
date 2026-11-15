@@ -1,22 +1,39 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { SessionProvider } from './lib/session';
+import { ns } from './lib/ns';
+import { Layout } from './components/Layout';
+import { Landing } from './pages/Landing';
+import { Onboard } from './pages/Onboard';
+import { Manage } from './pages/Manage';
+import { Quote } from './pages/Quote';
+import { Privacy } from './pages/Privacy';
+import './styles.css';
 
+// Deep link restored by 404.html on static hosts without rewrite rules.
+const redirect = sessionStorage.getItem('hmo_redirect');
+if (redirect) { sessionStorage.removeItem('hmo_redirect'); history.replaceState(null, '', redirect); }
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .register('./sw.js',{type:"module"}) 
-    .then((registration) => {
-      console.log('Service Worker registered with scope:', registration.scope);
-    })
-    .catch((error) => {
-      console.error('Service Worker registration failed:', error);
-    });
-}
+// Keep the browser's install prompt so the quote page can offer it later.
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); (window as any).__hmoInstall = e; window.dispatchEvent(new Event('hmo-installable')); });
+window.addEventListener('appinstalled', () => { void ns.track('installed', {}, { signedIn: true }); });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <SessionProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/start" element={<Onboard />} />
+            <Route path="/manage" element={<Manage />} />
+            <Route path="/n/:deliveryId" element={<Quote />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="*" element={<Landing />} />
+          </Routes>
+        </Layout>
+      </SessionProvider>
+    </BrowserRouter>
   </StrictMode>,
-)
+);
