@@ -1,45 +1,32 @@
-name: Deploy Client Workflow
-
+name: Deploy client
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "client/**"
+    branches: [main]
+    paths: ["client/**"]
   workflow_dispatch:
-    inputs:
-      name:
-        description: "Mannual dispatch"
-        required: true
-        default: "deploy"
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v1
-        with:
-          node-version: "22.14.0"
-
-      - name: Install Dependencies
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Install
         working-directory: ./client
         run: npm ci
-
       - name: Build
         working-directory: ./client
         run: npm run build
         env:
-          CI: ""
-
-      # - name: Deploy
-      #   run: |
-      #     npm install -g gh-pages
-      #     npx gh-pages -d './client/build'
+          VITE_PLATFORM_API_URL: ${{ vars.VITE_PLATFORM_API_URL }}
+          VITE_PUBLISHABLE_KEY: ${{ vars.VITE_PUBLISHABLE_KEY }}
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
       - name: Deploy
-        uses: crazy-max/ghaction-github-pages@v1
+        uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: gh-pages
           build_dir: ./client/dist
+          # Set the custom domain before the first real subscriber: subscriptions are bound to the origin.
+          fqdn: ${{ vars.APP_DOMAIN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

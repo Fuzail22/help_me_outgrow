@@ -1,0 +1,30 @@
+# Fly.io config for the help_me_outgrow backend. App name must be unique on Fly.
+app = "htsta-outgrow-api"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8787"
+  NODE_ENV = "production"
+  APP_ORIGIN = "https://outgrow.htsta.com"
+  PLATFORM_API_URL = "https://notification.htsta.com"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = false
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    path = "/auth/healthz"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
