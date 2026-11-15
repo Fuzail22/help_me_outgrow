@@ -1,6 +1,6 @@
 # Fly.io config for the help_me_outgrow backend. App name must be unique on Fly.
 app = "htsta-outgrow-api"
-primary_region = "bom"
+primary_region = "sin"
 
 [build]
   dockerfile = "Dockerfile"
