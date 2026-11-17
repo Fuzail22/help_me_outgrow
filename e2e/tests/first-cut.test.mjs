@@ -235,10 +235,10 @@ test('manage page: pause, resume, change times, stop with a reason', async () =>
   await v.context.close();
 });
 
-test('unsubscribing in the browser expires the device on the next send; the next visit offers resubscribe and delivery resumes', async () => {
+test('a lost subscription while permission is still granted reconnects silently on the next visit, and delivery resumes (R5)', async () => {
   const v = await visitor();
   const enr = await onboard(v.page, { name: 'Lapsed' });
-  // The person removes the site's notification permission: the push service now answers 410 Gone.
+  // The browser drops the push subscription (an iOS or browser reset); the push service now answers 410 Gone.
   const sub = await v.page.evaluate(() => JSON.parse(localStorage.getItem('__fakePushSub')));
   stack.push.setStatus(sub.id, 410);
   await v.page.evaluate(() => localStorage.removeItem('__fakePushSub'));
@@ -247,13 +247,15 @@ test('unsubscribing in the browser expires the device on the next send; the next
   assert.equal((await stack.stats()).totals.devicesExpired, expiredBefore + 1);
   assert.equal((await v.push.deliverPending(APP)).length, 0);
 
-  await v.page.goto(`${APP}/manage`);
-  await v.page.getByText('Notifications are off on this device.').waitFor();
+  // Permission is still granted, so the next visit re-subscribes without asking anything and shows no banner.
   const resubBefore = (await stack.stats()).lifecycle.resubscribed;
-  await v.page.getByRole('button', { name: 'Turn back on' }).click();
-  await v.page.getByText('Notifications are back on for this device.').waitFor();
-  assert.equal((await stack.stats()).lifecycle.resubscribed, resubBefore + 1);
-  assert.equal(await v.page.getByText('Notifications are off on this device.').count(), 0);
+  await v.page.goto(APP);
+  assert.ok(await poll(async () => (await stack.stats()).lifecycle.resubscribed === resubBefore + 1), 'reconnected silently');
+  assert.equal(await v.page.getByRole('status', { name: 'Notifications are off' }).count(), 0);
+  await v.page.goto(`${APP}/manage`);
+  await v.page.locator('.enrolment').first().waitFor();
+  await v.page.waitForTimeout(500);
+  assert.equal(await v.page.getByText('Notifications are off on this device.').count(), 0, 'the device is on again');
 
   // Next day's slot arrives on the new subscription, with the line that failed to arrive yesterday.
   const next = new Date(Date.parse(enr.nextSendAt) + 86400000).toISOString();
@@ -283,24 +285,6 @@ test('a blocked permission prompt saves nothing and explains how to allow', asyn
   await v.context.close();
 });
 
-test('iPhone Safari is told to add the site to the Home Screen, and interest is counted', async () => {
-  const v = await visitor({ device: devices['iPhone 14'], grant: false });
-  await v.page.goto(`${APP}/start`);
-  await v.page.getByRole('button', { name: /Burnt out/ }).click();
-  await v.page.getByRole('button', { name: 'Continue' }).click();
-  await v.page.getByRole('button', { name: 'Continue' }).click();
-  await v.page.getByRole('checkbox').check();
-  await v.page.route('**/auth/dev', (route) => route.continue({ postData: JSON.stringify({ name: 'iPhone' }) }));
-  await v.page.getByRole('button', { name: 'Continue as demo user' }).click();
-  await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
-  await v.page.getByText('On iPhone and iPad, add this site to your Home Screen first.').waitFor();
-  const before = (await stack.stats()).lifecycle.ios_interest;
-  await v.page.getByRole('button', { name: 'I would use this on my iPhone' }).click();
-  await v.page.getByText('Thanks, noted.').waitFor();
-  assert.ok(await poll(async () => (await stack.stats()).lifecycle.ios_interest === before + 1));
-  await v.context.close();
-});
-
 test('erase my data removes the person from the platform and the app', async () => {
   const v = await visitor();
   await onboard(v.page, { name: 'Eraser' });
@@ -321,7 +305,7 @@ test('the app is installable and the pages have no layout overflow on a phone', 
   await v.page.goto(APP);
   const manifest = await v.page.evaluate(async () => (await fetch(document.querySelector('link[rel=manifest]').href)).json());
   assert.equal(manifest.display, 'standalone');
-  assert.deepEqual(manifest.icons.map((i) => i.sizes), ['192x192', '512x512']);
+  assert.deepEqual(manifest.icons.map((i) => i.sizes), ['180x180', '192x192', '512x512']);
   for (const path of ['/', '/start', '/privacy', '/manage']) {
     await v.page.goto(APP + path);
     await v.page.locator('h1').first().waitFor();

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { HELPLINE_URL } from '../lib/ns';
 import { useSession } from '../lib/session';
+import { Reconnect } from './Reconnect';
 
 export function CareNote() {
   return (
@@ -20,6 +21,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Link to="/" className="brand"><img src="/icons/icon.svg" alt="" width="28" height="28" /> help me outgrow</Link>
         <nav>{user ? <Link to="/manage">My notes</Link> : <Link to="/manage">Sign in</Link>}</nav>
       </header>
+      <Reconnect />
       <main>{children}</main>
       <footer>
         <CareNote />

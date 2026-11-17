@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { IosGuide } from '../components/IosGuide';
+import { RECONNECTED } from '../components/Reconnect';
+import { needsHomeScreen } from '../lib/ios';
 import { Link, useSearchParams } from 'react-router-dom';
 import type { Enrolment, Me } from '@notification-service/sdk';
 import { auth, ns } from '../lib/ns';
@@ -89,13 +92,16 @@ export function Manage() {
     } catch { setError('We could not load your notes. Check your connection and reload.'); }
   }, []);
   useEffect(() => { if (user) void load(); }, [user, load]);
+  // A silent reconnect (components/Reconnect) re-registers this device: show the fresh state.
+  useEffect(() => { const f = () => { if (user) void load(); }; window.addEventListener(RECONNECTED, f); return () => window.removeEventListener(RECONNECTED, f); }, [user, load]);
 
   if (user === undefined) return <p className="muted" aria-busy="true">Loading…</p>;
   if (!user) {
     return (
       <section>
         <h1>Sign in to see your notes</h1>
-        <SignIn onSignedIn={setUser} />
+        <IosGuide />
+        {!needsHomeScreen() && <SignIn onSignedIn={setUser} />}
         <p className="muted">New here? <Link to="/start">Choose what you need</Link>.</p>
       </section>
     );

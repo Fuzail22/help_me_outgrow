@@ -73,3 +73,7 @@ blockquote { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(24
 .prose h2 { margin-top: 26px; } .prose li { margin-bottom: 8px; }
 .draft-flag { font-size: 14px; background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 8px 12px; }
 @media (max-width: 420px) { .actions:not(.left) .btn { flex: 1; } }
+
+.ios-guide ol { margin: 8px 0 6px; padding-left: 22px; } .ios-guide li { margin: 4px 0; }
+.landing .ios-guide { margin: 18px 0; }
+.reconnect { margin: 12px 0 0; }
