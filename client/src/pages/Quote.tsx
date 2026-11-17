@@ -49,6 +49,8 @@ export function Quote() {
     <section className="quote">
       <p className="eyebrow">{d.topic.title}</p>
       <blockquote>{d.body}</blockquote>
+      {/* Image content appears here only: iPhone notifications never show images (R5). */}
+      {(d as DeliveryView & { imageUrl?: string | null }).imageUrl && <img className="quote-image" src={(d as DeliveryView & { imageUrl?: string | null }).imageUrl!} alt="" loading="lazy" referrerPolicy="no-referrer" />}
       {d.attribution && <p className="muted">{d.attribution}</p>}
       {/* The rating pair is the first and largest control: on browsers without notification buttons
           (iPhone, Firefox, desktop Safari) this page is where people rate. */}

@@ -77,3 +77,4 @@ blockquote { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(24
 .ios-guide ol { margin: 8px 0 6px; padding-left: 22px; } .ios-guide li { margin: 4px 0; }
 .landing .ios-guide { margin: 18px 0; }
 .reconnect { margin: 12px 0 0; }
+.quote-image { display: block; max-width: 100%; height: auto; border-radius: 14px; margin: -12px 0 24px; }

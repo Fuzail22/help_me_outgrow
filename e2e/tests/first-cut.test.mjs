@@ -129,10 +129,15 @@ test('R1: rating from a notification button records it, opens nothing, and shows
   assert.deepEqual(note.actions, ['up', 'down']);
   const before = await stack.stats();
   const pagesBefore = v.context.pages().length;
+  // Record what the worker shows, so a slow runner cannot miss the short-lived confirmation.
+  await (await serviceWorker(v.context)).evaluate(() => {
+    const reg = self.registration; const show = reg.showNotification.bind(reg); self.__shown = [];
+    reg.showNotification = (title, opts = {}) => { self.__shown.push({ title, tag: opts.tag, actions: (opts.actions ?? []).map((a) => a.action) }); return show(title, opts); };
+  });
   await tapNotification(v.context, note.tag, 'down');
   assert.ok(await poll(async () => (await stack.stats()).ratings.down === before.ratings.down + 1), 'rating recorded');
   // Replaced under the same tag by a confirmation with no buttons…
-  const thanks = await poll(async () => (await shownNotifications(v.context)).find((n) => n.tag === note.tag && n.title === 'Thanks, noted'));
+  const thanks = await poll(async () => (await (await serviceWorker(v.context)).evaluate(() => self.__shown)).find((n) => n.tag === note.tag && n.title === 'Thanks, noted'), 8000);
   assert.ok(thanks, 'a "Thanks, noted" notification replaced the original');
   assert.deepEqual(thanks.actions, []);
   // …which the worker closes after about 3 seconds.
@@ -148,7 +153,9 @@ test('R1: rating from a notification button records it, opens nothing, and shows
   await v.push.deliverPending(APP);
   await (await serviceWorker(v.context)).evaluate(async (d) => self.registration.showNotification('again', { tag: d.deliveryId, data: d, actions: [{ action: 'up', title: 'Helpful' }] }), note.data);
   await tapNotification(v.context, note.tag, 'up');
-  assert.ok(await poll(async () => { const s = await stack.stats(); return s.ratings.up === after.ratings.up + 1 && s.ratings.down === after.ratings.down - 1; }), 'the second rating replaced the first');
+  let last;
+  const replaced = await poll(async () => { last = await stack.stats(); return last.ratings.up === after.ratings.up + 1 && last.ratings.down === after.ratings.down - 1; }, 10000);
+  assert.ok(replaced, `the second rating replaced the first (before ${JSON.stringify(after.ratings)}, now ${JSON.stringify(last.ratings)})`);
   await v.context.close();
 });
 

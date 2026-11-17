@@ -5,6 +5,7 @@ import { ns } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
 import { IosGuide } from '../components/IosGuide';
+import { rememberDeviceStopped } from '../components/Reconnect';
 import { needsHomeScreen } from '../lib/ios';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
 import { CareNote } from '../components/Layout';
@@ -54,6 +55,7 @@ export function Onboard() {
         setProblem({ kind: r.status === 'denied' ? 'denied' : r.status === 'dismissed' ? 'dismissed' : 'unsupported' });
         return;
       }
+      rememberDeviceStopped(false);
       void ns.track('permission_granted', {}, { signedIn: true });
       await ns.completeProfile({ timezone: draft.timezone });
       try {
