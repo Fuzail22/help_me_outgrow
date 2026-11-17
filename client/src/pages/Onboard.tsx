@@ -6,6 +6,9 @@ import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
 import { CareNote } from '../components/Layout';
+import { IosGuide } from '../components/IosGuide';
+import { iosInfo } from '../lib/ios';
+import { setDeviceTurnedOff } from '../lib/device';
 import { browserTimezone, describeSchedule, DURATIONS, endDateFor, formatDate, formatWhen, timezones, toSlots } from '../lib/time';
 
 type Step = 'topic' | 'times' | 'duration' | 'signin' | 'permission' | 'done';
@@ -28,7 +31,6 @@ export function Onboard() {
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<null | { kind: 'denied' | 'dismissed' | 'ios' | 'unsupported' | 'error'; message?: string }>(null);
   const [enrolment, setEnrolment] = useState<Enrolment | null>(null);
-  const [interest, setInterest] = useState(false);
 
   useEffect(() => { ns.getConfig().then(setConfig).catch(() => setLoadError(true)); void ns.track('onboard_start'); }, []);
   useEffect(() => { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); }, [draft]);
@@ -52,6 +54,7 @@ export function Onboard() {
         setProblem({ kind: r.status === 'denied' ? 'denied' : r.status === 'dismissed' ? 'dismissed' : 'unsupported' });
         return;
       }
+      setDeviceTurnedOff(false);
       void ns.track('permission_granted', {}, { signedIn: true });
       await ns.completeProfile({ timezone: draft.timezone });
       try {
@@ -67,6 +70,8 @@ export function Onboard() {
     } finally { setBusy(false); }
   }
 
+  // iPhone or iPad in a browser tab: push is impossible here, so guide to the Home Screen app before anything is chosen.
+  if (iosInfo().needsHomeScreen) return <section className="onboard"><h1>Get notes on your iPhone</h1><IosGuide where="start" /></section>;
   if (loadError) return <section><h1>We could not load the topics</h1><p>Check your connection and <a href="/start">try again</a>.</p></section>;
   if (!config) return <p className="muted" aria-busy="true">Loading…</p>;
 
@@ -161,9 +166,8 @@ export function Onboard() {
           {problem?.kind === 'dismissed' && <div className="callout warn" role="alert"><strong>The permission box was closed.</strong><p>Press the button again and choose Allow.</p></div>}
           {problem?.kind === 'ios' && (
             <div className="callout warn" role="alert">
-              <strong>On iPhone and iPad, add this site to your Home Screen first.</strong>
-              <p>Tap the Share button, choose “Add to Home Screen”, then open help me outgrow from the new icon and come back to this step. A simpler guided setup for iPhone is coming.</p>
-              {interest ? <p>Thanks, noted.</p> : <button className="btn secondary" onClick={() => { setInterest(true); void ns.track('ios_interest', {}, { signedIn: !!user }); }}>I would use this on my iPhone</button>}
+              <strong>On iPhone and iPad, notes arrive only in the Home Screen app.</strong>
+              <p>Tap the Share button, choose “Add to Home Screen”, then open outgrow from the new icon and sign in there.</p>
             </div>
           )}
           {problem?.kind === 'unsupported' && <div className="callout warn" role="alert"><strong>This browser cannot receive notifications from websites.</strong><p>Try Chrome, Edge or Firefox on Android or on a computer.</p></div>}

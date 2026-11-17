@@ -129,10 +129,15 @@ test('R1: rating from a notification button records it, opens nothing, and shows
   assert.deepEqual(note.actions, ['up', 'down']);
   const before = await stack.stats();
   const pagesBefore = v.context.pages().length;
+  // Record what the worker shows, so a slow runner cannot miss the short-lived confirmation.
+  await (await serviceWorker(v.context)).evaluate(() => {
+    const reg = self.registration; const show = reg.showNotification.bind(reg); self.__shown = [];
+    reg.showNotification = (title, opts = {}) => { self.__shown.push({ title, tag: opts.tag, actions: (opts.actions ?? []).map((a) => a.action) }); return show(title, opts); };
+  });
   await tapNotification(v.context, note.tag, 'down');
   assert.ok(await poll(async () => (await stack.stats()).ratings.down === before.ratings.down + 1), 'rating recorded');
   // Replaced under the same tag by a confirmation with no buttons…
-  const thanks = await poll(async () => (await shownNotifications(v.context)).find((n) => n.tag === note.tag && n.title === 'Thanks, noted'));
+  const thanks = await poll(async () => (await (await serviceWorker(v.context)).evaluate(() => self.__shown)).find((n) => n.tag === note.tag && n.title === 'Thanks, noted'), 8000);
   assert.ok(thanks, 'a "Thanks, noted" notification replaced the original');
   assert.deepEqual(thanks.actions, []);
   // …which the worker closes after about 3 seconds.
@@ -148,7 +153,9 @@ test('R1: rating from a notification button records it, opens nothing, and shows
   await v.push.deliverPending(APP);
   await (await serviceWorker(v.context)).evaluate(async (d) => self.registration.showNotification('again', { tag: d.deliveryId, data: d, actions: [{ action: 'up', title: 'Helpful' }] }), note.data);
   await tapNotification(v.context, note.tag, 'up');
-  assert.ok(await poll(async () => { const s = await stack.stats(); return s.ratings.up === after.ratings.up + 1 && s.ratings.down === after.ratings.down - 1; }), 'the second rating replaced the first');
+  let last;
+  const replaced = await poll(async () => { last = await stack.stats(); return last.ratings.up === after.ratings.up + 1 && last.ratings.down === after.ratings.down - 1; }, 10000);
+  assert.ok(replaced, `the second rating replaced the first (before ${JSON.stringify(after.ratings)}, now ${JSON.stringify(last.ratings)})`);
   await v.context.close();
 });
 
@@ -235,7 +242,7 @@ test('manage page: pause, resume, change times, stop with a reason', async () =>
   await v.context.close();
 });
 
-test('unsubscribing in the browser expires the device on the next send; the next visit offers resubscribe and delivery resumes', async () => {
+test('unsubscribing in the browser expires the device on the next send; the next visit resubscribes silently and delivery resumes', async () => {
   const v = await visitor();
   const enr = await onboard(v.page, { name: 'Lapsed' });
   // The person removes the site's notification permission: the push service now answers 410 Gone.
@@ -247,12 +254,11 @@ test('unsubscribing in the browser expires the device on the next send; the next
   assert.equal((await stack.stats()).totals.devicesExpired, expiredBefore + 1);
   assert.equal((await v.push.deliverPending(APP)).length, 0);
 
-  await v.page.goto(`${APP}/manage`);
-  await v.page.getByText('Notifications are off on this device.').waitFor();
+  // Permission is still granted, so the next visit resubscribes silently (R5): no prompt, no banner.
   const resubBefore = (await stack.stats()).lifecycle.resubscribed;
-  await v.page.getByRole('button', { name: 'Turn back on' }).click();
-  await v.page.getByText('Notifications are back on for this device.').waitFor();
-  assert.equal((await stack.stats()).lifecycle.resubscribed, resubBefore + 1);
+  await v.page.goto(`${APP}/manage`);
+  assert.ok(await poll(async () => (await stack.stats()).lifecycle.resubscribed === resubBefore + 1), 'resubscribed');
+  await v.page.getByText('Burnt out').first().waitFor();
   assert.equal(await v.page.getByText('Notifications are off on this device.').count(), 0);
 
   // Next day's slot arrives on the new subscription, with the line that failed to arrive yesterday.
@@ -283,24 +289,6 @@ test('a blocked permission prompt saves nothing and explains how to allow', asyn
   await v.context.close();
 });
 
-test('iPhone Safari is told to add the site to the Home Screen, and interest is counted', async () => {
-  const v = await visitor({ device: devices['iPhone 14'], grant: false });
-  await v.page.goto(`${APP}/start`);
-  await v.page.getByRole('button', { name: /Burnt out/ }).click();
-  await v.page.getByRole('button', { name: 'Continue' }).click();
-  await v.page.getByRole('button', { name: 'Continue' }).click();
-  await v.page.getByRole('checkbox').check();
-  await v.page.route('**/auth/dev', (route) => route.continue({ postData: JSON.stringify({ name: 'iPhone' }) }));
-  await v.page.getByRole('button', { name: 'Continue as demo user' }).click();
-  await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
-  await v.page.getByText('On iPhone and iPad, add this site to your Home Screen first.').waitFor();
-  const before = (await stack.stats()).lifecycle.ios_interest;
-  await v.page.getByRole('button', { name: 'I would use this on my iPhone' }).click();
-  await v.page.getByText('Thanks, noted.').waitFor();
-  assert.ok(await poll(async () => (await stack.stats()).lifecycle.ios_interest === before + 1));
-  await v.context.close();
-});
-
 test('erase my data removes the person from the platform and the app', async () => {
   const v = await visitor();
   await onboard(v.page, { name: 'Eraser' });
@@ -321,7 +309,7 @@ test('the app is installable and the pages have no layout overflow on a phone', 
   await v.page.goto(APP);
   const manifest = await v.page.evaluate(async () => (await fetch(document.querySelector('link[rel=manifest]').href)).json());
   assert.equal(manifest.display, 'standalone');
-  assert.deepEqual(manifest.icons.map((i) => i.sizes), ['192x192', '512x512']);
+  assert.deepEqual(manifest.icons.map((i) => i.sizes), ['192x192', '512x512', '512x512', '180x180']);
   for (const path of ['/', '/start', '/privacy', '/manage']) {
     await v.page.goto(APP + path);
     await v.page.locator('h1').first().waitFor();

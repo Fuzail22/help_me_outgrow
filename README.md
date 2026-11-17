@@ -20,10 +20,18 @@ Needs a checkout of `notification-service` beside this one (or set `NS_REPO`), w
 ```bash
 (cd api && npm ci) && (cd client && npm ci)
 node e2e/stack.mjs          # platform :8080, api :8787, app http://localhost:5173, dev login, throwaway keys
-cd e2e && npm test          # 13 browser tests
+cd e2e && npm test          # 19 browser tests (6 of them on an emulated iPhone)
 cd e2e && npm run demo      # records e2e/demo-output/first-cut-demo.mp4
 cd e2e && npm run demo:r1   # records e2e/demo-output/r1-feedback-demo.mp4 (rating from the notification)
+cd e2e && npm run demo:r5   # records e2e/demo-output/r5-iphone-demo.mp4 (iPhone, emulated)
 ```
+
+## iPhone
+
+iOS delivers web push only to a site added to the Home Screen, from iOS 16.4, and shows no notification
+buttons or images. In a Safari tab the app shows an Add to Home Screen guide (or asks for an iOS update)
+before sign-in; inside the Home Screen app the normal flow runs, and ratings go through the quote page.
+The browser tests emulate an iPhone; they are not a real device. Real-phone checks: [docs/iphone-test.md](docs/iphone-test.md).
 
 ## Going live (things only the owner can do)
 

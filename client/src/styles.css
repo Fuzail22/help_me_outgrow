@@ -9,7 +9,7 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
-.shell { max-width: 620px; margin: 0 auto; padding: 0 20px 40px; min-height: 100vh; display: flex; flex-direction: column; }
+.shell { max-width: 620px; margin: 0 auto; padding: env(safe-area-inset-top, 0) max(20px, env(safe-area-inset-right, 0)) max(40px, env(safe-area-inset-bottom, 0)) max(20px, env(safe-area-inset-left, 0)); min-height: 100vh; display: flex; flex-direction: column; }
 header.top { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; }
 .brand { display: inline-flex; gap: 10px; align-items: center; font-weight: 650; color: var(--ink); text-decoration: none; }
 .brand img { border-radius: 7px; }
@@ -73,3 +73,7 @@ blockquote { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(24
 .prose h2 { margin-top: 26px; } .prose li { margin-bottom: 8px; }
 .draft-flag { font-size: 14px; background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 8px 12px; }
 @media (max-width: 420px) { .actions:not(.left) .btn { flex: 1; } }
+.ios-guide .steps { margin: 10px 0; padding-left: 22px; display: grid; gap: 8px; }
+.share-icon { vertical-align: -4px; color: #0a84ff; }
+.banner { margin: 0 0 8px; }
+.quote-image { display: block; max-width: 100%; height: auto; border-radius: 14px; margin: -12px 0 24px; }

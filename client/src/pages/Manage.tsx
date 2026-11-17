@@ -4,6 +4,9 @@ import type { Enrolment, Me } from '@notification-service/sdk';
 import { auth, ns } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
+import { IosGuide } from '../components/IosGuide';
+import { iosInfo } from '../lib/ios';
+import { ensureConnected, setDeviceTurnedOff } from '../lib/device';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
 import { describeSchedule, formatDate, formatWhen, fromSlots, toSlots } from '../lib/time';
 
@@ -78,6 +81,8 @@ export function Manage() {
 
   const load = useCallback(async () => {
     try {
+      // Reconnect silently first if the subscription was lost but permission is still granted.
+      await ensureConnected();
       const [m, list] = await Promise.all([ns.getMe(), ns.listEnrolments()]);
       setMe(m); setEnrolments(list);
       const support = ns.detectSupport();
@@ -95,6 +100,7 @@ export function Manage() {
     return (
       <section>
         <h1>Sign in to see your notes</h1>
+        {iosInfo().needsHomeScreen && <IosGuide where="manage" />}
         <SignIn onSignedIn={setUser} />
         <p className="muted">New here? <Link to="/start">Choose what you need</Link>.</p>
       </section>
@@ -105,12 +111,12 @@ export function Manage() {
     setBusy(true); setNotice(null);
     try {
       const r = await ns.subscribe();
-      if (r.status === 'subscribed') { setNotice('Notifications are back on for this device.'); await load(); }
+      if (r.status === 'subscribed') { setDeviceTurnedOff(false); setNotice('Notifications are back on for this device.'); await load(); }
       else if (r.status === 'denied') setDevice('blocked');
       else setNotice('The permission box was closed. Try again and choose Allow.');
     } finally { setBusy(false); }
   };
-  const turnOff = async () => { setBusy(true); try { await ns.unsubscribe(); setNotice('This device will no longer receive notes.'); await load(); } finally { setBusy(false); } };
+  const turnOff = async () => { setBusy(true); try { await ns.unsubscribe(); setDeviceTurnedOff(true); setNotice('This device will no longer receive notes.'); await load(); } finally { setBusy(false); } };
   const erase = async () => {
     setBusy(true);
     try {
