@@ -20,8 +20,9 @@ Needs a checkout of `notification-service` beside this one (or set `NS_REPO`), w
 ```bash
 (cd api && npm ci) && (cd client && npm ci)
 node e2e/stack.mjs          # platform :8080, api :8787, app http://localhost:5173, dev login, throwaway keys
-cd e2e && npm test          # 11 browser tests
+cd e2e && npm test          # 13 browser tests
 cd e2e && npm run demo      # records e2e/demo-output/first-cut-demo.mp4
+cd e2e && npm run demo:r1   # records e2e/demo-output/r1-feedback-demo.mp4 (rating from the notification)
 ```
 
 ## Going live (things only the owner can do)

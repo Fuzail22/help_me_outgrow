@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, devices } from '../pw.mjs';
 import { startStack, APP, PLATFORM } from '../stack.mjs';
-import { wirePush, shownNotifications, tapNotification } from '../browser.mjs';
+import { wirePush, shownNotifications, tapNotification, serviceWorker } from '../browser.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 let stack, browser;
@@ -120,16 +120,89 @@ test('tapping the notification reports the click and the quote page takes a rati
   await fresh.close(); await v.context.close();
 });
 
-test('rating straight from the notification action button is recorded', async () => {
+test('R1: rating from a notification button records it, opens nothing, and shows a self-closing "Thanks, noted"', async () => {
   const v = await visitor();
   const enr = await onboard(v.page, { name: 'Action', topic: /Low mood/ });
   await stack.tick(enr.nextSendAt);
   await v.push.deliverPending(APP);
   const [note] = await poll(async () => { const n = await shownNotifications(v.context); return n.length ? n : null; });
-  const before = (await stack.stats()).ratings.down;
+  assert.deepEqual(note.actions, ['up', 'down']);
+  const before = await stack.stats();
+  const pagesBefore = v.context.pages().length;
   await tapNotification(v.context, note.tag, 'down');
-  assert.ok(await poll(async () => (await stack.stats()).ratings.down === before + 1));
+  assert.ok(await poll(async () => (await stack.stats()).ratings.down === before.ratings.down + 1), 'rating recorded');
+  // Replaced under the same tag by a confirmation with no buttons…
+  const thanks = await poll(async () => (await shownNotifications(v.context)).find((n) => n.tag === note.tag && n.title === 'Thanks, noted'));
+  assert.ok(thanks, 'a "Thanks, noted" notification replaced the original');
+  assert.deepEqual(thanks.actions, []);
+  // …which the worker closes after about 3 seconds.
+  const gone = await poll(async () => (await shownNotifications(v.context)).length === 0, 6000);
+  assert.ok(gone, 'the confirmation closed itself');
+  const after = await stack.stats();
+  assert.equal(after.delivery.clicked, before.delivery.clicked, 'a rating is not an open');
+  assert.equal(after.delivery.rated, before.delivery.rated + 1);
+  assert.equal(v.context.pages().length, pagesBefore, 'no tab or window was opened');
+  assert.ok(v.page.url().startsWith(APP) && !/\/n\//.test(v.page.url()), 'the open tab did not navigate to the quote page');
+
+  // Rating again replaces the earlier rating (one per delivery).
+  await v.push.deliverPending(APP);
+  await (await serviceWorker(v.context)).evaluate(async (d) => self.registration.showNotification('again', { tag: d.deliveryId, data: d, actions: [{ action: 'up', title: 'Helpful' }] }), note.data);
+  await tapNotification(v.context, note.tag, 'up');
+  assert.ok(await poll(async () => { const s = await stack.stats(); return s.ratings.up === after.ratings.up + 1 && s.ratings.down === after.ratings.down - 1; }), 'the second rating replaced the first');
   await v.context.close();
+});
+
+test('R1: a rating the platform rejects shows no "Thanks" and is not retried', async () => {
+  const v = await visitor();
+  const enr = await onboard(v.page, { name: 'Rejected', topic: /Burnt out/ });
+  await stack.tick(enr.nextSendAt);
+  await v.push.deliverPending(APP);
+  const [note] = await poll(async () => { const n = await shownNotifications(v.context); return n.length ? n : null; });
+  const feedbackCalls = [];
+  v.context.on('request', (r) => { if (r.url().includes('/v1/feedback')) feedbackCalls.push(r.url()); });
+  const sw = await serviceWorker(v.context);
+  await sw.evaluate(async (d) => self.registration.showNotification('bad token', { tag: 'bad', data: { ...d, token: 'not-a-valid-token' }, actions: [{ action: 'up', title: 'Helpful' }] }), note.data);
+  const before = await stack.stats();
+  await tapNotification(v.context, 'bad', 'up');
+  await new Promise((r) => setTimeout(r, 1500));
+  const titles = (await shownNotifications(v.context)).map((n) => n.title);
+  assert.ok(!titles.includes('Thanks, noted'), `no Thanks expected, saw ${titles}`);
+  assert.equal(feedbackCalls.length, 1, 'exactly one attempt');
+  const after = await stack.stats();
+  assert.equal(after.ratings.up, before.ratings.up);
+  assert.equal(after.delivery.clicked, before.delivery.clicked);
+  await v.context.close();
+});
+
+test('R1: the quote page is a one-tap rating screen (browsers without notification buttons)', async () => {
+  const v = await visitor({ device: devices['Desktop Chrome'] });
+  const enr = await onboard(v.page, { name: 'PageRater', topic: /Burnt out/ });
+  await stack.tick(enr.nextSendAt);
+  await v.push.deliverPending(APP);
+  const [note] = await poll(async () => { const n = await shownNotifications(v.context); return n.length ? n : null; });
+  // The payload is the same for every browser; the page is where browsers without buttons rate.
+  const q = await (await browser.newContext(devices['iPhone 13'])).newPage();
+  await q.goto(note.data.url);
+  await q.locator('blockquote').waitFor();
+  const controls = q.locator('main button, main a, main textarea, main input');
+  assert.equal(await controls.first().getAttribute('aria-label'), 'Helpful', 'the rating pair is the first control');
+  const up = await q.getByRole('button', { name: 'Helpful' }).boundingBox();
+  const down = await q.getByRole('button', { name: 'Not for me' }).boundingBox();
+  for (const other of await controls.all()) {
+    const label = await other.getAttribute('aria-label');
+    if (label === 'Helpful' || label === 'Not for me' || !(await other.isVisible())) continue;
+    const b = await other.boundingBox();
+    assert.ok(b.width * b.height < up.width * up.height, `"${(await other.innerText()).trim()}" is larger than the rating buttons`);
+  }
+  assert.ok(Math.abs(up.y - down.y) < 2, 'the pair sits side by side');
+  const before = await stack.stats();
+  await q.getByRole('button', { name: 'Not for me' }).click();
+  await q.getByText('You can close this tab.').waitFor();
+  assert.match(await q.getByRole('status').first().innerText(), /Noted\. You can close this tab\./);
+  assert.equal(await q.getByRole('button', { name: 'Not for me' }).getAttribute('aria-pressed'), 'true');
+  assert.ok(await poll(async () => (await stack.stats()).ratings.down === before.ratings.down + 1));
+  await q.screenshot({ path: join(here, '..', 'test-results', 'r1-quote-rating-iphone.png') });
+  await q.context().close(); await v.context.close();
 });
 
 test('manage page: pause, resume, change times, stop with a reason', async () => {
