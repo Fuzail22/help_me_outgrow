@@ -178,6 +178,65 @@
           "firstLine": "Going from employee to your own boss is as much an inner shift as a practical one. For roughly ninety days, these short notes will help you grow into that new role."
         }
       ]
+    },
+    {
+      "date": "2026-11-19-run4",
+      "topics": [
+        {
+          "slug": "jealousy",
+          "title": "Outgrowing jealousy in relationships",
+          "description": "For feeling more secure and less consumed by jealousy with the people you love.",
+          "sensitive": false,
+          "file": "csv/jealousy.csv",
+          "lines": 92,
+          "firstLine": "Jealousy can make love feel like a test you are always about to fail. For about ninety days, these notes will help you build a calmer, more secure footing in the relationships that matter to you."
+        },
+        {
+          "slug": "control",
+          "title": "Loosening the need for control",
+          "description": "For easing your grip on people, plans and outcomes.",
+          "sensitive": false,
+          "file": "csv/control.csv",
+          "lines": 92,
+          "firstLine": "Holding tightly to plans, people and outcomes can be exhausting. Across roughly ninety days, these notes invite you to loosen your grip a finger at a time and see what happens."
+        },
+        {
+          "slug": "complaining",
+          "title": "From complaining to changing",
+          "description": "For outgrowing habitual complaining and moving towards action and acceptance.",
+          "sensitive": false,
+          "file": "csv/complaining.csv",
+          "lines": 92,
+          "firstLine": "Over roughly the next ninety days, you will practise moving from complaining towards changing what you can and accepting what you cannot. You are not being asked to pretend everything is fine."
+        },
+        {
+          "slug": "reader",
+          "title": "Becoming a reader again",
+          "description": "For growing back into someone who reads books for pleasure.",
+          "sensitive": false,
+          "file": "csv/reader.csv",
+          "lines": 92,
+          "firstLine": "Over roughly the next ninety days, you will practise becoming a reader again. Not a speed reader or a book collector, just someone who finds their way back to the page."
+        },
+        {
+          "slug": "learner",
+          "title": "Becoming a lifelong learner",
+          "description": "For learning a new skill as an adult and outgrowing too old, not the type.",
+          "sensitive": false,
+          "file": "csv/learner.csv",
+          "lines": 92,
+          "firstLine": "For about ninety days, these notes will help you take up learning again as a grown-up. You do not need a classroom or a certificate, only a little curiosity and a few minutes most days."
+        },
+        {
+          "slug": "organised-life",
+          "title": "Becoming an organised person",
+          "description": "For calmer home and admin habits, and fewer last-minute scrambles.",
+          "sensitive": false,
+          "file": "csv/organised-life.csv",
+          "lines": 92,
+          "firstLine": "Across roughly ninety days, these notes will help you build a calmer, tidier relationship with your home and your admin. No overhaul needed, just small steady habits."
+        }
+      ]
     }
   ]
 }
