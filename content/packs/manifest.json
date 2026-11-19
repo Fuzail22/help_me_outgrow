@@ -119,6 +119,65 @@
           "firstLine": "Family can be the people who know you best and the people who push hardest on your limits. Both can be true at once."
         }
       ]
+    },
+    {
+      "date": "2026-11-19",
+      "topics": [
+        {
+          "slug": "scrolling-less",
+          "title": "Taking back your attention",
+          "description": "For outgrowing compulsive phone and screen habits and choosing where your attention goes.",
+          "sensitive": false,
+          "file": "csv/scrolling-less.csv",
+          "lines": 92,
+          "firstLine": "Your attention is one of the few things that is truly yours. Over the next ninety days or so, you will slowly take more of it back, one small choice at a time."
+        },
+        {
+          "slug": "anger-calm",
+          "title": "Becoming slower to anger",
+          "description": "For outgrowing a quick temper and growing into a calmer, steadier you.",
+          "sensitive": false,
+          "file": "csv/anger-calm.csv",
+          "lines": 92,
+          "firstLine": "Over roughly the next ninety days, you will practise becoming slower to anger. Not a different person, just a steadier version of the one you already are."
+        },
+        {
+          "slug": "creative-again",
+          "title": "Making things again",
+          "description": "For returning to a creative practice after years away.",
+          "sensitive": false,
+          "file": "csv/creative-again.csv",
+          "lines": 92,
+          "firstLine": "For years you may have told yourself you are not creative anymore. Over the next ninety or so days, we will test that story gently, one small made thing at a time."
+        },
+        {
+          "slug": "solitude",
+          "title": "Learning to enjoy your own company",
+          "description": "For growing comfortable, even content, with time on your own.",
+          "sensitive": false,
+          "file": "csv/solitude.csv",
+          "lines": 92,
+          "firstLine": "Being on your own can feel awkward, even uneasy. Over roughly ninety days, these notes will help you discover that your own company can be a place of rest."
+        },
+        {
+          "slug": "friendship-rebuild",
+          "title": "Building new friendships as an adult",
+          "description": "For becoming someone who reaches out, follows up and keeps friends.",
+          "sensitive": false,
+          "file": "csv/friendship-rebuild.csv",
+          "lines": 92,
+          "firstLine": "Friendships in adult life rarely just happen; they get built, one small contact at a time. These notes will keep you company for about ninety days while you build yours."
+        },
+        {
+          "slug": "going-freelance",
+          "title": "Becoming your own boss",
+          "description": "For growing into self-employment (habits and feelings, not financial or legal advice).",
+          "sensitive": false,
+          "file": "csv/going-freelance.csv",
+          "lines": 92,
+          "firstLine": "Going from employee to your own boss is as much an inner shift as a practical one. For roughly ninety days, these short notes will help you grow into that new role."
+        }
+      ]
     }
   ]
 }
