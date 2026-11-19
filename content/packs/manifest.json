@@ -1,0 +1,65 @@
+{
+  "about": "Topic packs written by the scheduled routine. Every slug here, and every slug in ../topics.json, is taken: later runs must pick new topics from BACKLOG.md and pass check.mjs.",
+  "artifactUrl": "https://claude.ai/artifact/C8Mns1gsZF71xFX5KJs2zp",
+  "runs": [
+    {
+      "date": "2026-11-19",
+      "topics": [
+        {
+          "slug": "people-pleasing",
+          "title": "Letting go of people-pleasing",
+          "description": "For learning to say no and stop shaping yourself around other people's approval.",
+          "sensitive": false,
+          "file": "csv/people-pleasing.csv",
+          "lines": 92,
+          "firstLine": "People-pleasing usually started as a clever way to stay safe. Over the next ninety days you get to decide whether it still serves you."
+        },
+        {
+          "slug": "career-change",
+          "title": "Changing careers",
+          "description": "For leaving one line of work and growing into the next.",
+          "sensitive": false,
+          "file": "csv/career-change.csv",
+          "lines": 92,
+          "firstLine": "Leaving one kind of work for another is a big move. It makes sense that part of you feels unsteady right now."
+        },
+        {
+          "slug": "new-place",
+          "title": "Starting over in a new place",
+          "description": "For building a life, and a new sense of self, after a move.",
+          "sensitive": false,
+          "file": "csv/new-place.csv",
+          "lines": 92,
+          "firstLine": "Moving somewhere new takes more out of a person than most people admit. If you are tired in a way sleep does not fix, that makes sense."
+        },
+        {
+          "slug": "start-doing",
+          "title": "From putting off to doing",
+          "description": "For outgrowing procrastination and becoming someone who starts and finishes.",
+          "sensitive": false,
+          "file": "csv/start-doing.csv",
+          "lines": 92,
+          "firstLine": "Putting things off is not a character flaw. It is usually a way of protecting yourself from a feeling you would rather not have."
+        },
+        {
+          "slug": "self-belief",
+          "title": "Quieting self-doubt",
+          "description": "For outgrowing a harsh inner critic and growing into quieter confidence.",
+          "sensitive": false,
+          "file": "csv/self-belief.csv",
+          "lines": 92,
+          "firstLine": "The voice that tells you that you are not enough has been talking a long time. For the next few months, you get to talk back, gently."
+        },
+        {
+          "slug": "someone-who-moves",
+          "title": "Becoming someone who moves",
+          "description": "For growing into a person who walks, stretches and exercises, at any age or fitness level.",
+          "sensitive": false,
+          "file": "csv/someone-who-moves.csv",
+          "lines": 92,
+          "firstLine": "You have spent years thinking of yourself as not the sporty type. This is a quiet invitation to try on a different story, one day at a time."
+        }
+      ]
+    }
+  ]
+}
