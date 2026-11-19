@@ -56,3 +56,17 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - presence: Living more in the present
 - purpose: Finding what matters to you
 - resilience: Bouncing back from setbacks
+
+## Added by run 5 (unused ideas)
+- body-kindness: Making peace with your body (not weight or diet advice)
+- speaking-up: Finding your voice in meetings and groups
+- caregiver-self: Keeping yourself while caring for a parent
+- sober-curious: Becoming someone who drinks less (not medical advice)
+- conflict-calm: Handling disagreement without avoiding or exploding
+- nature-connection: Becoming someone who spends time outdoors
+- digital-creator: Sharing your work publicly for the first time
+- after-redundancy: Rebuilding after losing a job
+- slow-living: Outgrowing constant busyness
+- new-city-dating: Dating again with confidence
+- mentor-others: Growing into someone who mentors others
+- second-language: Becoming someone who speaks another language

@@ -237,6 +237,65 @@
           "firstLine": "Across roughly ninety days, these notes will help you build a calmer, tidier relationship with your home and your admin. No overhaul needed, just small steady habits."
         }
       ]
+    },
+    {
+      "date": "2026-11-19-run5",
+      "topics": [
+        {
+          "slug": "better-listener",
+          "title": "Becoming a better listener",
+          "description": "For growing into someone who listens fully, interrupts less and makes people feel heard.",
+          "sensitive": false,
+          "file": "csv/better-listener.csv",
+          "lines": 92,
+          "firstLine": "Over roughly the next ninety days, these short notes will help you become a better listener. Not a silent one, just someone who lets other people finish and feel properly heard."
+        },
+        {
+          "slug": "leader-new",
+          "title": "Growing into your first leadership role",
+          "description": "For the shift from doing the work to leading people who do it.",
+          "sensitive": false,
+          "file": "csv/leader-new.csv",
+          "lines": 92,
+          "firstLine": "Stepping from doing the work to leading the people who do it is a real shift. Over roughly the next ninety days, these short notes will keep you company as you grow into it."
+        },
+        {
+          "slug": "healthy-eating-identity",
+          "title": "Becoming someone who cooks for themselves",
+          "description": "For growing from takeaways and skipped meals into someone who cooks simple food at home (not diet advice).",
+          "sensitive": false,
+          "file": "csv/healthy-eating-identity.csv",
+          "lines": 92,
+          "firstLine": "Over roughly the next ninety days, these short notes will help you become someone who cooks for themselves. Not a chef, just a person who can make a simple meal at home and enjoy it."
+        },
+        {
+          "slug": "new-parent-identity",
+          "title": "Finding yourself again as a new parent",
+          "description": "For holding on to who you are while growing into being a parent.",
+          "sensitive": false,
+          "file": "csv/new-parent-identity.csv",
+          "lines": 92,
+          "firstLine": "Over roughly the next ninety days, these short notes will keep you company as you grow into being a parent while holding on to who you are. Read them whenever you can; there is no wrong time."
+        },
+        {
+          "slug": "empty-nest",
+          "title": "When the children leave home",
+          "description": "For rediscovering yourself, your days and your relationships once the children have grown and gone.",
+          "sensitive": false,
+          "file": "csv/empty-nest.csv",
+          "lines": 92,
+          "firstLine": "Over roughly the next ninety days, these short notes will keep you company as the house grows quieter. One a day, to help you find out who you are now the children have flown."
+        },
+        {
+          "slug": "retirement",
+          "title": "Starting retirement with purpose",
+          "description": "For growing into life after work with structure, meaning and connection (not financial advice).",
+          "sensitive": false,
+          "file": "csv/retirement.csv",
+          "lines": 92,
+          "firstLine": "Welcome to the start of something new. Over roughly ninety days, these brief notes will help you shape a life after work that feels purposeful, structured and connected."
+        }
+      ]
     }
   ]
 }
