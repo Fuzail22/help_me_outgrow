@@ -1,0 +1,121 @@
+<title>Outgrow Topic Packs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: a single reading column; each scheduled run is a dated shelf of topic cards with its own download. */
+:root {
+  --bg: #f6f7f2; --surface: #ffffff; --fg: #1f2620; --muted: #5d6b60; --line: #dde3d8;
+  --accent: #2f6b4f; --accent-fg: #ffffff; --chip: #e7efe8;
+  --display: "Fraunces", Georgia, serif; --body: "Inter", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141a16; --surface: #1c241f; --fg: #e6ece6; --muted: #9db0a2; --line: #2d3a31;
+  --accent: #7cc49d; --accent-fg: #0f1a13; --chip: #23332a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141a16; --surface: #1c241f; --fg: #e6ece6; --muted: #9db0a2; --line: #2d3a31;
+  --accent: #7cc49d; --accent-fg: #0f1a13; --chip: #23332a; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 32px; }
+h1, h2 { font-family: var(--display); font-weight: 650; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.1; }
+h2 { font-size: 1.35rem; }
+p { margin: 0; max-width: 65ch; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+header { display: grid; gap: 12px; }
+.howto { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; }
+.howto ol { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+code { font-family: var(--mono); font-size: .85em; background: var(--chip); padding: 1px 5px; border-radius: 4px; }
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: 600 .9rem var(--body); border-radius: 8px; padding: 9px 14px; cursor: pointer; border: 1px solid var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-fg); }
+button.ghost { background: transparent; color: var(--accent); }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: .5; cursor: default; }
+.run { display: grid; gap: 14px; }
+.run-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.card h3 { margin: 0; font: 600 1rem var(--body); }
+.slug { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.first { font-style: italic; color: var(--muted); font-size: .9rem; }
+.meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: .78rem; }
+.chip { background: var(--chip); border-radius: 999px; padding: 2px 9px; font-variant-numeric: tabular-nums; }
+.status { min-height: 1.4em; font-size: .9rem; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Outgrow Topic Packs</h1>
+    <p class="muted">New topics for help me outgrow, each with at least 92 daily lines (one a day for 90+ days). A scheduled run adds a new shelf here; topics never repeat across runs.</p>
+    <div class="bar">
+      <button class="primary" id="all" disabled>Download every pack (.zip)</button>
+      <span class="status" id="status" role="status">Loading packs…</span>
+    </div>
+  </header>
+
+  <section class="howto">
+    <h2>Import into the console</h2>
+    <ol>
+      <li>In the notification service console, open <strong>Topics</strong> and create the topic with the slug and title shown on the card.</li>
+      <li>Open the topic, choose the CSV under <strong>Bulk add</strong>, then <strong>Preview import</strong>. The file has a <code>body</code> column, plus <code>seq</code> and an empty <code>attribution</code>.</li>
+      <li>Check the preview and import. The same file also works with <code>POST /v1/topics/:id/items:import</code>.</li>
+    </ol>
+  </section>
+
+  <div id="runs" class="run"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const status = (t) => { $('#status').textContent = t; };
+let manifest = null;
+const downloadsP = (window.claude?.use ? window.claude.use('downloads') : Promise.resolve(null)).catch(() => null);
+
+function h(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k.startsWith('on') ? e.addEventListener(k.slice(2), v) : e.setAttribute(k, v);
+  for (const k of kids) e.append(k);
+  return e;
+}
+async function save(filename, data) {
+  const d = await downloadsP;
+  if (!d) { status('Downloads are not available in this view. Open the artifact in claude.ai to save files.'); return; }
+  try { await d.save({ filename, data }); status(`Saved ${filename}.`); }
+  catch (e) { status(e?.code === 'declined' ? 'Download cancelled.' : `Could not save ${filename} (${e?.code || 'error'}).`); }
+}
+const getText = async (path) => { const r = await fetch(path); if (!r.ok) throw new Error(path); return r.text(); };
+async function zip(topics, name) {
+  status('Building zip…');
+  const z = new JSZip();
+  for (const t of topics) z.file(t.file.split('/').pop(), await getText(t.file));
+  z.file('topics.json', JSON.stringify(topics.map(({ slug, title, description, sensitive, file }) => ({ slug, title, description, sensitive, file: file.replace(/^csv\//, 'topics/') })), null, 2));
+  await save(name, await z.generateAsync({ type: 'blob' }));
+}
+
+function render() {
+  const root = $('#runs'); root.replaceChildren();
+  const total = manifest.runs.reduce((a, r) => a + r.topics.length, 0);
+  for (const run of [...manifest.runs].reverse()) {
+    const grid = h('div', { class: 'grid' });
+    for (const t of run.topics) grid.append(h('article', { class: 'card' },
+      h('h3', {}, t.title), h('span', { class: 'slug' }, t.slug),
+      h('p', { class: 'small' }, t.description),
+      h('p', { class: 'first' }, `Day 1: “${t.firstLine}”`),
+      h('div', { class: 'meta' }, h('span', { class: 'chip' }, `${t.lines} lines`), ...(t.sensitive ? [h('span', { class: 'chip' }, 'sensitive')] : [])),
+      h('div', { class: 'bar' }, h('button', { class: 'ghost', onclick: async () => save(t.file.split('/').pop(), await getText(t.file)) }, 'Download CSV'))));
+    root.append(h('section', { class: 'run' },
+      h('div', { class: 'run-head' }, h('h2', {}, `Run of ${run.date}`),
+        h('button', { class: 'ghost', onclick: () => zip(run.topics, `outgrow-packs-${run.date}.zip`) }, `Download this run (${run.topics.length} packs)`)),
+      grid));
+  }
+  $('#all').disabled = false;
+  $('#all').textContent = `Download every pack (${total}, .zip)`;
+  status(`${total} packs across ${manifest.runs.length} run${manifest.runs.length === 1 ? '' : 's'}.`);
+}
+$('#all').addEventListener('click', () => zip(manifest.runs.flatMap((r) => r.topics), `outgrow-packs-all.zip`));
+fetch('manifest.json').then((r) => r.json()).then((m) => { manifest = m; render(); })
+  .catch(() => status('Could not load the pack list. Reload the page to try again.'));
+</script>
