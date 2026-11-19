@@ -296,6 +296,65 @@
           "firstLine": "Welcome to the start of something new. Over roughly ninety days, these brief notes will help you shape a life after work that feels purposeful, structured and connected."
         }
       ]
+    },
+    {
+      "date": "2026-11-19-run6",
+      "topics": [
+        {
+          "slug": "after-graduation",
+          "title": "The year after graduating",
+          "description": "For finding your footing, identity and direction in the first year out of education (not career or financial advice).",
+          "sensitive": false,
+          "file": "csv/after-graduation.csv",
+          "lines": 92,
+          "firstLine": "The first year after education can feel strangely shapeless, even lonely. Over roughly ninety days, these notes will help you find your footing and a sense of who you are becoming."
+        },
+        {
+          "slug": "turning-forty",
+          "title": "Growing into midlife",
+          "description": "For meeting midlife with curiosity rather than dread, and growing into who you are next.",
+          "sensitive": false,
+          "file": "csv/turning-forty.csv",
+          "lines": 92,
+          "firstLine": "Arriving at midlife can stir up a quiet dread, or a sense that the best chapters are behind you. Over roughly ninety days, these notes will help you meet this stage with curiosity and grow into who you are next."
+        },
+        {
+          "slug": "self-respect",
+          "title": "Treating yourself with respect",
+          "description": "For keeping promises to yourself, speaking to yourself kindly and expecting decent treatment.",
+          "sensitive": false,
+          "file": "csv/self-respect.csv",
+          "lines": 92,
+          "firstLine": "Respecting yourself can feel unfamiliar, even a little uncomfortable at first. Over roughly ninety days, these notes will help you keep your word to yourself, speak to yourself kindly and expect decent treatment."
+        },
+        {
+          "slug": "forgiveness",
+          "title": "Letting go of an old grudge",
+          "description": "For loosening resentment's hold for your own sake, without excusing harm or needing reconciliation.",
+          "sensitive": false,
+          "file": "csv/forgiveness.csv",
+          "lines": 92,
+          "firstLine": "Holding onto an old hurt can feel like guarding something important. Over roughly ninety days, these notes will help you loosen a grudge's grip for your own sake, without excusing what happened."
+        },
+        {
+          "slug": "asking-for-help",
+          "title": "Learning to ask for help",
+          "description": "For outgrowing doing everything alone and becoming someone who can ask for and accept support.",
+          "sensitive": false,
+          "file": "csv/asking-for-help.csv",
+          "lines": 92,
+          "firstLine": "Doing everything yourself can feel like safety, even pride. Over the next ninety or so days, these notes will help you practise letting other people share the load."
+        },
+        {
+          "slug": "gratitude-practice",
+          "title": "Noticing what is good",
+          "description": "For an honest gratitude habit, not forced positivity: you can feel bad and grateful at once.",
+          "sensitive": false,
+          "file": "csv/gratitude-practice.csv",
+          "lines": 92,
+          "firstLine": "Gratitude does not mean pretending everything is fine. Over roughly ninety days, these notes will help you notice what is good alongside whatever is hard."
+        }
+      ]
     }
   ]
 }

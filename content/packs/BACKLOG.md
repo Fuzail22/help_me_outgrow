@@ -70,3 +70,13 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - new-city-dating: Dating again with confidence
 - mentor-others: Growing into someone who mentors others
 - second-language: Becoming someone who speaks another language
+
+## Added by run 6 (unused ideas)
+- imposter-feelings: Feeling like you belong at work
+- saying-yes: Saying yes to new experiences (outgrowing a comfort zone)
+- quieter-ego: Needing less recognition
+- tidy-mind-journaling: Becoming someone who journals
+- sleep-routine-identity: Becoming someone who winds down at night (not medical advice)
+- new-language-of-feelings: Naming your feelings
+- volunteer-self: Becoming someone who gives time to their community
+- patience: Growing more patient with people and progress
