@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { IosGuide } from '../components/IosGuide';
-import { RECONNECTED } from '../components/Reconnect';
+import { RECONNECTED, rememberDeviceStopped } from '../components/Reconnect';
 import { needsHomeScreen } from '../lib/ios';
 import { Link, useSearchParams } from 'react-router-dom';
 import type { Enrolment, Me } from '@notification-service/sdk';
@@ -111,12 +111,12 @@ export function Manage() {
     setBusy(true); setNotice(null);
     try {
       const r = await ns.subscribe();
-      if (r.status === 'subscribed') { setNotice('Notifications are back on for this device.'); await load(); }
+      if (r.status === 'subscribed') { rememberDeviceStopped(false); setNotice('Notifications are back on for this device.'); await load(); }
       else if (r.status === 'denied') setDevice('blocked');
       else setNotice('The permission box was closed. Try again and choose Allow.');
     } finally { setBusy(false); }
   };
-  const turnOff = async () => { setBusy(true); try { await ns.unsubscribe(); setNotice('This device will no longer receive notes.'); await load(); } finally { setBusy(false); } };
+  const turnOff = async () => { setBusy(true); try { await ns.unsubscribe(); rememberDeviceStopped(true); setNotice('This device will no longer receive notes.'); await load(); } finally { setBusy(false); } };
   const erase = async () => {
     setBusy(true);
     try {

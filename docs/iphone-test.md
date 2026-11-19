@@ -32,6 +32,7 @@ a real iPhone can show. Run it on the live site after a deploy, and record the r
 | 15 | Settings → Notifications → outgrow → turn **Allow Notifications** off. Open the app again. | One banner says "Notifications are off on this device" with **Turn them back on**. My notes shows the same warning. | |
 | 16 | Turn **Allow Notifications** back on in Settings and open the app. | The banner is gone after a reload. The next note arrives at its time. | |
 | 17 | *(Optional.)* Delete the Home Screen icon, add it again from Safari, open it and sign in. | My notes shows the earlier enrolment. If the app reports notifications off, tap **Turn back on**; notes arrive again. | |
+| 18 | On **My notes**, tap **Stop notes on this device**, then close and reopen the app twice. | The app does **not** turn notes back on by itself; My notes offers **Turn on notifications**. | |
 
 **Still marked unverified until this checklist is run:**
 

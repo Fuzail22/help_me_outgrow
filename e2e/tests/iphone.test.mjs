@@ -149,6 +149,53 @@ test('the Home Screen app reconnects silently when its subscription is lost; wit
   await w.context.close(); await v.context.close();
 });
 
+test('"Stop notes on this device" is never undone by the silent reconnect, even with permission still granted (emulated iPhone)', async () => {
+  const v = await iphone({ homeScreen: true });
+  await chooseNotes(v.page, /Loss/);
+  await v.page.getByRole('checkbox').check();
+  await v.page.getByRole('button', { name: 'Continue as demo user' }).click();
+  await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
+  await v.page.getByRole('heading', { name: 'You are set.' }).waitFor();
+  await v.page.goto(`${APP}/manage`);
+  await v.page.getByRole('button', { name: 'Stop notes on this device' }).click();
+  await v.page.getByText('This device will no longer receive notes.').waitFor();
+  const activeAfterStop = (await stack.stats()).totals.devicesActive;
+  // Reopen the app twice: notes still scheduled, permission still granted, but the person said stop.
+  for (const path of ['/', '/manage']) { await v.page.goto(APP + path); await v.page.waitForTimeout(1200); }
+  assert.equal((await stack.stats()).totals.devicesActive, activeAfterStop, 'no silent re-subscribe after an explicit stop');
+  // Turning them back on by hand works, and from then on the silent reconnect applies again.
+  await v.page.getByRole('button', { name: /Turn (back )?on/ }).first().click();
+  assert.ok(await poll(async () => (await stack.stats()).totals.devicesActive === activeAfterStop + 1), 'turned back on by hand');
+  await v.page.evaluate(() => localStorage.removeItem('__fakePushSub'));
+  await v.page.goto(APP);
+  assert.ok(await poll(async () => (await stack.stats()).totals.devicesActive === activeAfterStop + 2), 'silent reconnect applies again');
+  await v.context.close();
+});
+
+test('image content appears only on the quote page; the notification does not depend on it (emulated iPhone)', async () => {
+  const v = await iphone({ homeScreen: true });
+  await chooseNotes(v.page, /Low mood/);
+  await v.page.getByRole('checkbox').check();
+  await v.page.getByRole('button', { name: 'Continue as demo user' }).click();
+  const created = v.page.waitForResponse((r) => r.url().endsWith('/v1/subscribers/me/enrolments') && r.request().method() === 'POST');
+  await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
+  const enr = await (await created).json();
+  await stack.tick(enr.nextSendAt);
+  const [msg] = await v.push.deliverPending(APP);
+  const payload = JSON.parse(msg.payload);
+  assert.ok(payload.title && payload.body && payload.url, 'the note reads and opens without an image or buttons');
+  // A line with an image (0.8 content; the platform already returns imageUrl on the delivery view).
+  await v.page.route(/\/v1\/deliveries\/[^/?]+/, async (route) => {
+    const res = await route.fetch(); const body = await res.json();
+    await route.fulfill({ response: res, json: { ...body, imageUrl: `${APP}/icons/512.png` } });
+  });
+  await v.page.goto(payload.url);
+  const img = v.page.locator('img.quote-image');
+  await img.waitFor();
+  assert.equal(await img.getAttribute('src'), `${APP}/icons/512.png`);
+  await v.context.close();
+});
+
 test('the web app manifest and head tags give iOS what it needs (checked against the code and the served page)', async () => {
   const manifest = JSON.parse(readFileSync(join(here, '..', '..', 'client', 'public', 'manifest.webmanifest'), 'utf8'));
   assert.equal(manifest.display, 'standalone');

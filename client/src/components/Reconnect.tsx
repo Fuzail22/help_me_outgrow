@@ -6,6 +6,13 @@ import { useSession } from '../lib/session';
 const DISMISSED = 'hmo_reconnect_dismissed';
 export const RECONNECTED = 'hmo-reconnected';
 
+/** Set by "Stop notes on this device": the silent reconnect must never undo that choice. Cleared by turning notes on. */
+const STOPPED = 'hmo_device_stopped';
+export function rememberDeviceStopped(stopped: boolean) {
+  try { if (stopped) localStorage.setItem(STOPPED, '1'); else localStorage.removeItem(STOPPED); } catch { /* storage blocked */ }
+}
+const deviceStopped = () => { try { return localStorage.getItem(STOPPED) === '1'; } catch { return false; } };
+
 /**
  * R5: if this device's push subscription was lost while notification permission is still granted (an iOS or
  * browser reset), subscribe again silently. Otherwise, when someone still has notes running, show one banner.
@@ -21,6 +28,7 @@ export function Reconnect() {
     (async () => {
       const support = ns.detectSupport();
       if (!support.supported) return; // iPhone in Safari: the Home Screen guide covers it
+      if (deviceStopped()) return; // the person stopped notes on this device; My notes offers to turn them on
       const live = (await ns.listEnrolments()).filter((e) => e.status === 'active' || e.status === 'paused');
       if (!live.length) return;
       const [me, sub] = await Promise.all([ns.getMe(), ns.currentSubscription()]);

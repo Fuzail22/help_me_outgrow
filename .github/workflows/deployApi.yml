@@ -1,15 +1,36 @@
 name: Deploy api (manual)
+# Every runtime setting lives in the GitHub `production` environment (secrets and variables), shared with the
+# client build. This workflow copies the api's settings to Fly as staged secrets, then deploys.
 on:
   workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Copy settings from GitHub to Fly (staged; values are not printed)
+        working-directory: ./api
+        run: |
+          # The app's origin is derived from APP_DOMAIN, the same variable the client deploy uses.
+          if [ -z "$APP_DOMAIN" ]; then echo "::error::Missing in the GitHub production environment: APP_DOMAIN. Nothing was changed on Fly."; exit 1; fi
+          export APP_ORIGIN="https://$APP_DOMAIN"
+          ../.github/scripts/sync-fly-secrets.sh
+        env:
+          REQUIRED: SESSION_SECRET APP_ORIGIN PLATFORM_API_URL PLATFORM_SECRET_KEY GOOGLE_CLIENT_ID MONGO_URI
+          OPTIONAL: ""
+          PROTECTED: ""
+          # Secrets
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          PLATFORM_SECRET_KEY: ${{ secrets.PLATFORM_SECRET_KEY }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          # Variables (not secret)
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+          PLATFORM_API_URL: ${{ vars.PLATFORM_API_URL }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
       - name: Deploy
         working-directory: ./api
         run: flyctl deploy --remote-only --ha=false
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

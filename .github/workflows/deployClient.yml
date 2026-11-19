@@ -7,7 +7,24 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Same settings as the api deploy: one GitHub `production` environment for the whole app.
+    environment: production
+    env:
+      VITE_PLATFORM_API_URL: ${{ vars.PLATFORM_API_URL }}
+      VITE_API_URL: ${{ vars.API_URL }}
+      VITE_PUBLISHABLE_KEY: ${{ vars.PUBLISHABLE_KEY }}
+      VITE_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+      VITE_HELPLINE_URL: ${{ vars.HELPLINE_URL }}
+      APP_DOMAIN: ${{ vars.APP_DOMAIN }}
     steps:
+      - name: Check settings
+        # A missing value would publish a site that cannot sign in or subscribe: stop before building.
+        run: |
+          missing=""
+          for pair in PLATFORM_API_URL:VITE_PLATFORM_API_URL API_URL:VITE_API_URL PUBLISHABLE_KEY:VITE_PUBLISHABLE_KEY GOOGLE_CLIENT_ID:VITE_GOOGLE_CLIENT_ID APP_DOMAIN:APP_DOMAIN; do
+            v="${pair#*:}"; [ -n "${!v}" ] || missing="$missing ${pair%%:*}"
+          done
+          if [ -n "$missing" ]; then echo "::error::Missing variables in the GitHub production environment:$missing. Nothing was published."; exit 1; fi
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
@@ -16,12 +33,10 @@ jobs:
         run: npm ci
       - name: Build
         working-directory: ./client
-        run: npm run build
-        env:
-          VITE_PLATFORM_API_URL: ${{ vars.VITE_PLATFORM_API_URL }}
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-          VITE_PUBLISHABLE_KEY: ${{ vars.VITE_PUBLISHABLE_KEY }}
-          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+        run: |
+          # An empty helpline variable falls back to the default in the app.
+          [ -n "$VITE_HELPLINE_URL" ] || unset VITE_HELPLINE_URL
+          npm run build
       - name: Deploy
         uses: crazy-max/ghaction-github-pages@v4
         with:

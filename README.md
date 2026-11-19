@@ -34,9 +34,27 @@ cd e2e && npm run demo:iphone # records e2e/demo-output/r5-iphone-demo.mp4 (emul
    `--click-url "https://<domain>/n/{deliveryId}?t={token}"`; keep the keys.
 3. `PLATFORM_API_URL=… PLATFORM_SECRET_KEY=sk_… node content/seed.mjs`
 4. Create a Google OAuth web client (authorised JavaScript origin = the app domain); publish the consent screen.
-5. Deploy `api/` with `api/.env.example` filled in, reachable at `https://<domain>/auth/*` (same origin as the app,
-   so the session cookie is first-party).
-6. Set the repository variables used by `.github/workflows/deployClient.yml` and push `client/` to `main`.
+5. Put every setting in the GitHub `production` environment (table below), then run *Deploy api (manual)*: it
+   copies the api's settings to Fly and deploys. Do not use `fly secrets set` by hand; the next deploy overwrites it.
+6. Push `client/` to `main` (or run *Deploy client*): it builds with the same environment's variables.
+
+### Settings: one place, the GitHub `production` environment
+
+Both deploy workflows read the same environment, so a value shared by the api and the app is entered once.
+`api/fly.toml` keeps only `PORT` and `NODE_ENV`, which are constants of the image.
+
+| Name | Kind | Used by | Notes |
+| --- | --- | --- | --- |
+| `FLY_API_TOKEN` | secret | api deploy | |
+| `SESSION_SECRET` | secret | api | `openssl rand -hex 32`; changing it signs everyone out |
+| `PLATFORM_SECRET_KEY` | secret | api | `sk_…` from the platform's bootstrap |
+| `MONGO_URI` | secret | api | required: without it the api would keep users in a file that Fly discards |
+| `APP_DOMAIN` | variable | api, app | e.g. `outgrow.htsta.com`; the api's `APP_ORIGIN` is `https://` + this, and it is the Pages domain |
+| `API_URL` | variable | app | the api's address, e.g. `https://api.outgrow.htsta.com` |
+| `PLATFORM_API_URL` | variable | api, app | `https://notification.htsta.com` |
+| `PUBLISHABLE_KEY` | variable | app | `pk_…` from the bootstrap (public by design) |
+| `GOOGLE_CLIENT_ID` | variable | api, app | the OAuth web client (public by design) |
+| `HELPLINE_URL` | variable | app | optional; defaults to https://findahelpline.com/ |
 
 ## Content
 

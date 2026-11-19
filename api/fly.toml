@@ -5,11 +5,11 @@ primary_region = "sin"
 [build]
   dockerfile = "Dockerfile"
 
+# Constants of the image only. Every other setting is kept in the GitHub `production` environment and copied
+# to Fly by .github/workflows/deployApi.yml.
 [env]
   PORT = "8787"
   NODE_ENV = "production"
-  APP_ORIGIN = "https://outgrow.htsta.com"
-  PLATFORM_API_URL = "https://notification.htsta.com"
 
 [http_service]
   internal_port = 8787
