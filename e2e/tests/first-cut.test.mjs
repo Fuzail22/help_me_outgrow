@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, devices } from '../pw.mjs';
 import { startStack, APP, PLATFORM } from '../stack.mjs';
-import { wirePush, shownNotifications, tapNotification } from '../browser.mjs';
+import { wirePush, shownNotifications, tapNotification, serviceWorker } from '../browser.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 let stack, browser;
@@ -120,16 +120,96 @@ test('tapping the notification reports the click and the quote page takes a rati
   await fresh.close(); await v.context.close();
 });
 
-test('rating straight from the notification action button is recorded', async () => {
+test('R1: rating from a notification button records it, opens nothing, and shows a self-closing "Thanks, noted"', async () => {
   const v = await visitor();
   const enr = await onboard(v.page, { name: 'Action', topic: /Low mood/ });
   await stack.tick(enr.nextSendAt);
   await v.push.deliverPending(APP);
   const [note] = await poll(async () => { const n = await shownNotifications(v.context); return n.length ? n : null; });
-  const before = (await stack.stats()).ratings.down;
+  assert.deepEqual(note.actions, ['up', 'down']);
+  const before = await stack.stats();
+  const pagesBefore = v.context.pages().length;
+  // Record what the worker shows, so a slow runner cannot miss the short-lived confirmation.
+  await (await serviceWorker(v.context)).evaluate(() => {
+    const reg = self.registration; const show = reg.showNotification.bind(reg); self.__shown = [];
+    reg.showNotification = (title, opts = {}) => { self.__shown.push({ title, tag: opts.tag, actions: (opts.actions ?? []).map((a) => a.action) }); return show(title, opts); };
+  });
   await tapNotification(v.context, note.tag, 'down');
-  assert.ok(await poll(async () => (await stack.stats()).ratings.down === before + 1));
+  assert.ok(await poll(async () => (await stack.stats()).ratings.down === before.ratings.down + 1), 'rating recorded');
+  // Replaced under the same tag by a confirmation with no buttons…
+  const thanks = await poll(async () => (await (await serviceWorker(v.context)).evaluate(() => self.__shown)).find((n) => n.tag === note.tag && n.title === 'Thanks, noted'), 8000);
+  assert.ok(thanks, 'a "Thanks, noted" notification replaced the original');
+  assert.deepEqual(thanks.actions, []);
+  // …which the worker closes after about 3 seconds.
+  const gone = await poll(async () => (await shownNotifications(v.context)).length === 0, 6000);
+  assert.ok(gone, 'the confirmation closed itself');
+  const after = await stack.stats();
+  assert.equal(after.delivery.clicked, before.delivery.clicked, 'a rating is not an open');
+  assert.equal(after.delivery.rated, before.delivery.rated + 1);
+  assert.equal(v.context.pages().length, pagesBefore, 'no tab or window was opened');
+  assert.ok(v.page.url().startsWith(APP) && !/\/n\//.test(v.page.url()), 'the open tab did not navigate to the quote page');
+
+  // Rating again replaces the earlier rating (one per delivery).
+  await v.push.deliverPending(APP);
+  await (await serviceWorker(v.context)).evaluate(async (d) => self.registration.showNotification('again', { tag: d.deliveryId, data: d, actions: [{ action: 'up', title: 'Helpful' }] }), note.data);
+  await tapNotification(v.context, note.tag, 'up');
+  let last;
+  const replaced = await poll(async () => { last = await stack.stats(); return last.ratings.up === after.ratings.up + 1 && last.ratings.down === after.ratings.down - 1; }, 10000);
+  assert.ok(replaced, `the second rating replaced the first (before ${JSON.stringify(after.ratings)}, now ${JSON.stringify(last.ratings)})`);
   await v.context.close();
+});
+
+test('R1: a rating the platform rejects shows no "Thanks" and is not retried', async () => {
+  const v = await visitor();
+  const enr = await onboard(v.page, { name: 'Rejected', topic: /Burnt out/ });
+  await stack.tick(enr.nextSendAt);
+  await v.push.deliverPending(APP);
+  const [note] = await poll(async () => { const n = await shownNotifications(v.context); return n.length ? n : null; });
+  const feedbackCalls = [];
+  v.context.on('request', (r) => { if (r.url().includes('/v1/feedback')) feedbackCalls.push(r.url()); });
+  const sw = await serviceWorker(v.context);
+  await sw.evaluate(async (d) => self.registration.showNotification('bad token', { tag: 'bad', data: { ...d, token: 'not-a-valid-token' }, actions: [{ action: 'up', title: 'Helpful' }] }), note.data);
+  const before = await stack.stats();
+  await tapNotification(v.context, 'bad', 'up');
+  await new Promise((r) => setTimeout(r, 1500));
+  const titles = (await shownNotifications(v.context)).map((n) => n.title);
+  assert.ok(!titles.includes('Thanks, noted'), `no Thanks expected, saw ${titles}`);
+  assert.equal(feedbackCalls.length, 1, 'exactly one attempt');
+  const after = await stack.stats();
+  assert.equal(after.ratings.up, before.ratings.up);
+  assert.equal(after.delivery.clicked, before.delivery.clicked);
+  await v.context.close();
+});
+
+test('R1: the quote page is a one-tap rating screen (browsers without notification buttons)', async () => {
+  const v = await visitor({ device: devices['Desktop Chrome'] });
+  const enr = await onboard(v.page, { name: 'PageRater', topic: /Burnt out/ });
+  await stack.tick(enr.nextSendAt);
+  await v.push.deliverPending(APP);
+  const [note] = await poll(async () => { const n = await shownNotifications(v.context); return n.length ? n : null; });
+  // The payload is the same for every browser; the page is where browsers without buttons rate.
+  const q = await (await browser.newContext(devices['iPhone 13'])).newPage();
+  await q.goto(note.data.url);
+  await q.locator('blockquote').waitFor();
+  const controls = q.locator('main button, main a, main textarea, main input');
+  assert.equal(await controls.first().getAttribute('aria-label'), 'Helpful', 'the rating pair is the first control');
+  const up = await q.getByRole('button', { name: 'Helpful' }).boundingBox();
+  const down = await q.getByRole('button', { name: 'Not for me' }).boundingBox();
+  for (const other of await controls.all()) {
+    const label = await other.getAttribute('aria-label');
+    if (label === 'Helpful' || label === 'Not for me' || !(await other.isVisible())) continue;
+    const b = await other.boundingBox();
+    assert.ok(b.width * b.height < up.width * up.height, `"${(await other.innerText()).trim()}" is larger than the rating buttons`);
+  }
+  assert.ok(Math.abs(up.y - down.y) < 2, 'the pair sits side by side');
+  const before = await stack.stats();
+  await q.getByRole('button', { name: 'Not for me' }).click();
+  await q.getByText('You can close this tab.').waitFor();
+  assert.match(await q.getByRole('status').first().innerText(), /Noted\. You can close this tab\./);
+  assert.equal(await q.getByRole('button', { name: 'Not for me' }).getAttribute('aria-pressed'), 'true');
+  assert.ok(await poll(async () => (await stack.stats()).ratings.down === before.ratings.down + 1));
+  await q.screenshot({ path: join(here, '..', 'test-results', 'r1-quote-rating-iphone.png') });
+  await q.context().close(); await v.context.close();
 });
 
 test('manage page: pause, resume, change times, stop with a reason', async () => {
@@ -162,10 +242,10 @@ test('manage page: pause, resume, change times, stop with a reason', async () =>
   await v.context.close();
 });
 
-test('unsubscribing in the browser expires the device on the next send; the next visit offers resubscribe and delivery resumes', async () => {
+test('a lost subscription while permission is still granted reconnects silently on the next visit, and delivery resumes (R5)', async () => {
   const v = await visitor();
   const enr = await onboard(v.page, { name: 'Lapsed' });
-  // The person removes the site's notification permission: the push service now answers 410 Gone.
+  // The browser drops the push subscription (an iOS or browser reset); the push service now answers 410 Gone.
   const sub = await v.page.evaluate(() => JSON.parse(localStorage.getItem('__fakePushSub')));
   stack.push.setStatus(sub.id, 410);
   await v.page.evaluate(() => localStorage.removeItem('__fakePushSub'));
@@ -174,13 +254,15 @@ test('unsubscribing in the browser expires the device on the next send; the next
   assert.equal((await stack.stats()).totals.devicesExpired, expiredBefore + 1);
   assert.equal((await v.push.deliverPending(APP)).length, 0);
 
-  await v.page.goto(`${APP}/manage`);
-  await v.page.getByText('Notifications are off on this device.').waitFor();
+  // Permission is still granted, so the next visit re-subscribes without asking anything and shows no banner.
   const resubBefore = (await stack.stats()).lifecycle.resubscribed;
-  await v.page.getByRole('button', { name: 'Turn back on' }).click();
-  await v.page.getByText('Notifications are back on for this device.').waitFor();
-  assert.equal((await stack.stats()).lifecycle.resubscribed, resubBefore + 1);
-  assert.equal(await v.page.getByText('Notifications are off on this device.').count(), 0);
+  await v.page.goto(APP);
+  assert.ok(await poll(async () => (await stack.stats()).lifecycle.resubscribed === resubBefore + 1), 'reconnected silently');
+  assert.equal(await v.page.getByRole('status', { name: 'Notifications are off' }).count(), 0);
+  await v.page.goto(`${APP}/manage`);
+  await v.page.locator('.enrolment').first().waitFor();
+  await v.page.waitForTimeout(500);
+  assert.equal(await v.page.getByText('Notifications are off on this device.').count(), 0, 'the device is on again');
 
   // Next day's slot arrives on the new subscription, with the line that failed to arrive yesterday.
   const next = new Date(Date.parse(enr.nextSendAt) + 86400000).toISOString();
@@ -210,24 +292,6 @@ test('a blocked permission prompt saves nothing and explains how to allow', asyn
   await v.context.close();
 });
 
-test('iPhone Safari is told to add the site to the Home Screen, and interest is counted', async () => {
-  const v = await visitor({ device: devices['iPhone 14'], grant: false });
-  await v.page.goto(`${APP}/start`);
-  await v.page.getByRole('button', { name: /Burnt out/ }).click();
-  await v.page.getByRole('button', { name: 'Continue' }).click();
-  await v.page.getByRole('button', { name: 'Continue' }).click();
-  await v.page.getByRole('checkbox').check();
-  await v.page.route('**/auth/dev', (route) => route.continue({ postData: JSON.stringify({ name: 'iPhone' }) }));
-  await v.page.getByRole('button', { name: 'Continue as demo user' }).click();
-  await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
-  await v.page.getByText('On iPhone and iPad, add this site to your Home Screen first.').waitFor();
-  const before = (await stack.stats()).lifecycle.ios_interest;
-  await v.page.getByRole('button', { name: 'I would use this on my iPhone' }).click();
-  await v.page.getByText('Thanks, noted.').waitFor();
-  assert.ok(await poll(async () => (await stack.stats()).lifecycle.ios_interest === before + 1));
-  await v.context.close();
-});
-
 test('erase my data removes the person from the platform and the app', async () => {
   const v = await visitor();
   await onboard(v.page, { name: 'Eraser' });
@@ -248,7 +312,7 @@ test('the app is installable and the pages have no layout overflow on a phone', 
   await v.page.goto(APP);
   const manifest = await v.page.evaluate(async () => (await fetch(document.querySelector('link[rel=manifest]').href)).json());
   assert.equal(manifest.display, 'standalone');
-  assert.deepEqual(manifest.icons.map((i) => i.sizes), ['192x192', '512x512']);
+  assert.deepEqual(manifest.icons.map((i) => i.sizes), ['180x180', '192x192', '512x512']);
   for (const path of ['/', '/start', '/privacy', '/manage']) {
     await v.page.goto(APP + path);
     await v.page.locator('h1').first().waitFor();

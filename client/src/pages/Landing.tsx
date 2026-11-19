@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ns } from '../lib/ns';
+import { IosGuide } from '../components/IosGuide';
 
 let counted = false;
 
@@ -18,6 +19,7 @@ export function Landing() {
         Pick what you are going through and when you want to hear from us. A short, supportive note arrives in your
         browser's notifications at those times. No app to install.
       </p>
+      <IosGuide compact />
       <Link className="btn primary big" to="/start">Choose what you need</Link>
       <p className="muted small">Free. Up to three months. Stop any time.</p>
     </section>

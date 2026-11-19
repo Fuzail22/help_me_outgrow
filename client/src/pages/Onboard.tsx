@@ -4,6 +4,9 @@ import type { Config, Enrolment } from '@notification-service/sdk';
 import { ns } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
+import { IosGuide } from '../components/IosGuide';
+import { rememberDeviceStopped } from '../components/Reconnect';
+import { needsHomeScreen } from '../lib/ios';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
 import { CareNote } from '../components/Layout';
 import { browserTimezone, describeSchedule, DURATIONS, endDateFor, formatDate, formatWhen, timezones, toSlots } from '../lib/time';
@@ -52,6 +55,7 @@ export function Onboard() {
         setProblem({ kind: r.status === 'denied' ? 'denied' : r.status === 'dismissed' ? 'dismissed' : 'unsupported' });
         return;
       }
+      rememberDeviceStopped(false);
       void ns.track('permission_granted', {}, { signedIn: true });
       await ns.completeProfile({ timezone: draft.timezone });
       try {
@@ -130,14 +134,18 @@ export function Onboard() {
 
       {step === 'signin' && topic && (
         <>
-          <h1>Save your choices</h1>
-          <p>Sign in so your notes can follow you and you can change or stop them later.</p>
+          <h1>{needsHomeScreen() ? 'One step before you sign in' : 'Save your choices'}</h1>
+          {!needsHomeScreen() && <p>Sign in so your notes can follow you and you can change or stop them later.</p>}
           <div className="summary"><strong>{topic.title}</strong><span>{describeSchedule(slots)}</span><span>Until {formatDate(endDate)}</span></div>
-          <label className="check">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-            <span>I agree to my choices being stored so the notes can be sent, as described in the <Link to="/privacy" target="_blank">privacy notice</Link>.</span>
-          </label>
-          {consent ? <SignIn onSignedIn={(u) => { setUser(u); afterSignIn(); }} /> : <p className="muted small">Tick the box to continue.</p>}
+          {!needsHomeScreen() && (
+            <label className="check">
+              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+              <span>I agree to my choices being stored so the notes can be sent, as described in the <Link to="/privacy" target="_blank">privacy notice</Link>.</span>
+            </label>
+          )}
+          {/* iPhone in Safari: sign-in and notifications have to happen inside the Home Screen app (R5). */}
+          {needsHomeScreen() ? <IosGuide />
+            : consent ? <SignIn onSignedIn={(u) => { setUser(u); afterSignIn(); }} /> : <p className="muted small">Tick the box to continue.</p>}
           <div className="actions"><button className="btn secondary" onClick={() => setStep('duration')}>Back</button></div>
         </>
       )}
