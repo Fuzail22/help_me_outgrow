@@ -60,6 +60,65 @@
           "firstLine": "You have spent years thinking of yourself as not the sporty type. This is a quiet invitation to try on a different story, one day at a time."
         }
       ]
+    },
+    {
+      "date": "2026-11-19-run2",
+      "topics": [
+        {
+          "slug": "perfectionism",
+          "title": "Good enough is good: easing perfectionism",
+          "description": "For loosening impossible standards and finishing things kindly.",
+          "sensitive": false,
+          "file": "csv/perfectionism.csv",
+          "lines": 92,
+          "firstLine": "Wanting things done well is a good quality. Over the next ninety days, you get to find out where it helps you and where it quietly wears you down."
+        },
+        {
+          "slug": "overthinking",
+          "title": "Getting out of your head",
+          "description": "For outgrowing rumination and replaying, and coming back to the present.",
+          "sensitive": false,
+          "file": "csv/overthinking.csv",
+          "lines": 92,
+          "firstLine": "If your mind tends to run the same thoughts round and round, you are not alone. Over the next ninety days you can practise stepping out of the loop."
+        },
+        {
+          "slug": "comparison",
+          "title": "Stopping the comparison habit",
+          "description": "For measuring your life by your own values instead of other people’s highlights.",
+          "sensitive": false,
+          "file": "csv/comparison.csv",
+          "lines": 92,
+          "firstLine": "Comparing yourself to others is one of the oldest human habits. Over the next ninety days you can learn to loosen its grip, one ordinary day at a time."
+        },
+        {
+          "slug": "money-calm",
+          "title": "Becoming calm and steady with money",
+          "description": "For growing a steadier, less anxious relationship with money (habits and feelings, not financial advice).",
+          "sensitive": false,
+          "file": "csv/money-calm.csv",
+          "lines": 92,
+          "firstLine": "Money stirs up strong feelings for almost everyone. Over the next ninety days you can grow a calmer, steadier relationship with it."
+        },
+        {
+          "slug": "morning-person",
+          "title": "Becoming a morning person",
+          "description": "For gently shifting your days earlier and growing into someone who enjoys mornings.",
+          "sensitive": false,
+          "file": "csv/morning-person.csv",
+          "lines": 92,
+          "firstLine": "You do not have to become a different species to enjoy mornings. You just need a few kind changes, tried slowly, over the next few months."
+        },
+        {
+          "slug": "boundaries-family",
+          "title": "Holding boundaries with family",
+          "description": "For saying what you need with the people who know you longest.",
+          "sensitive": false,
+          "file": "csv/boundaries-family.csv",
+          "lines": 92,
+          "firstLine": "Family can be the people who know you best and the people who push hardest on your limits. Both can be true at once."
+        }
+      ]
     }
   ]
 }
