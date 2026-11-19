@@ -1,11 +1,22 @@
 name: Deploy client
+# Deploys automatically when a merge to main changes the app, after CI passes on that commit; also by hand.
 on:
   push:
     branches: [main]
-    paths: ["client/**"]
+    paths:
+      - "client/**"
+      - ".github/workflows/deployClient.yml"
+      - ".github/workflows/ci.yml"
+      - ".github/scripts/**"
   workflow_dispatch:
+concurrency:
+  group: deploy-client
+  cancel-in-progress: false
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
   deploy:
+    needs: ci
     runs-on: ubuntu-latest
     # Same settings as the api deploy: one GitHub `production` environment for the whole app.
     environment: production
@@ -46,3 +57,10 @@ jobs:
           fqdn: ${{ vars.APP_DOMAIN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check the live site serves this build
+        # GitHub's own "pages build and deployment" job publishes the gh-pages push; wait until the live page
+        # references this build's script (its file name carries a content hash), so "green" means "live".
+        run: |
+          asset="$(grep -Eo 'assets/index-[A-Za-z0-9_-]+\.js' client/dist/index.html | head -1)"
+          [ -n "$asset" ] || { echo "::error::could not find the built script in client/dist/index.html"; exit 1; }
+          TRIES=36 DELAY=10 .github/scripts/wait-healthy.sh "https://$APP_DOMAIN/?release=$GITHUB_SHA" "$asset"

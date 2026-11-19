@@ -34,9 +34,18 @@ cd e2e && npm run demo:iphone # records e2e/demo-output/r5-iphone-demo.mp4 (emul
    `--click-url "https://<domain>/n/{deliveryId}?t={token}"`; keep the keys.
 3. `PLATFORM_API_URL=… PLATFORM_SECRET_KEY=sk_… node content/seed.mjs`
 4. Create a Google OAuth web client (authorised JavaScript origin = the app domain); publish the consent screen.
-5. Put every setting in the GitHub `production` environment (table below), then run *Deploy api (manual)*: it
+5. Put every setting in the GitHub `production` environment (table below), then run *Deploy api*: it
    copies the api's settings to Fly and deploys. Do not use `fly secrets set` by hand; the next deploy overwrites it.
 6. Push `client/` to `main` (or run *Deploy client*): it builds with the same environment's variables.
+
+### Releases are automatic
+
+A merge to `main` deploys what it changed, after CI passes on that commit:
+`api/**` → *Deploy api* (settings sync, `flyctl deploy`, then `API_URL/auth/healthz` must answer);
+`client/**` → *Deploy client* (build, publish to Pages, then the live page must reference the new build).
+Changes to the CI or deploy workflows or `.github/scripts/` release both. One deploy of each runs at a time,
+in merge order. Both can also be started by hand. To require an approval before each release, add required
+reviewers to the `production` environment.
 
 ### Settings: one place, the GitHub `production` environment
 
