@@ -4,7 +4,7 @@ import { RECONNECTED, rememberDeviceStopped } from '../components/Reconnect';
 import { needsHomeScreen } from '../lib/ios';
 import { Link, useSearchParams } from 'react-router-dom';
 import type { Me } from '@notification-service/sdk';
-import { app, auth, ns, type AppEnrolment as Enrolment, type EnrolmentPatch, type Limits } from '../lib/ns';
+import { api, app, auth, ns, type AppEnrolment as Enrolment, type EnrolmentPatch, type Limits } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
@@ -81,6 +81,7 @@ export function Manage() {
   const [me, setMe] = useState<Me | null>(null);
   const [enrolments, setEnrolments] = useState<Enrolment[] | null>(null);
   const [limits, setLimits] = useState<Limits | null>(null);
+  const [ending, setEnding] = useState(0);
   const [device, setDevice] = useState<DeviceState>('checking');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(params.get('already') ? 'You already follow that topic. Change its times below.' : null);
@@ -91,6 +92,8 @@ export function Manage() {
     try {
       const [m, list, lim] = await Promise.all([ns.getMe(), app.enrolments(), app.limits()]);
       setMe(m); setEnrolments(list); setLimits(lim);
+      // Paid privileges ending within 3 days: one quiet reminder.
+      api<{ mine: { endingSoon: boolean }[] }>('GET', '/api/upgrade/catalog').then((c) => setEnding(c.mine.filter((x) => x.endingSoon).length)).catch(() => undefined);
       const support = ns.detectSupport();
       if (!support.supported) return setDevice('unsupported');
       if (ns.permission() === 'denied') return setDevice('blocked');
@@ -140,6 +143,7 @@ export function Manage() {
       <h1>My notes</h1>
       <p className="muted">Signed in as {user.name}</p>
       {notice && <div className="callout" role="status">{notice}</div>}
+      {ending > 0 && <div className="callout" role="status">{ending === 1 ? 'A paid privilege ends' : `${ending} paid privileges end`} in under 3 days. <Link to="/upgrade">Renew</Link> or keep growing on <Link to="/growth">Grow with us</Link>.</div>}
       {error && <div className="callout warn" role="alert">{error}</div>}
 
       {device === 'off' && live.length > 0 && (

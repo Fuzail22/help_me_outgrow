@@ -22,7 +22,7 @@ delete-all for the user only; carry on without stopping unless the owner objects
 | G2+G3 levels, celebration, referrals, proofs | HMO | done | Levels evaluated on read (ratings from platform summary, cached 60 s); visits per (code, device), owner devices excluded (also retroactively); proofs reviewed by support; one atomic pick per level; celebration dialog with padlock animation (reduced-motion aware). |
 | G4 VAVP1/2/3 | HMO | done | VAVP1/2 via entitlements (VAVP2 also patches running courses); VAVP3 own topics (private platform topic, public after editor review, 150-line cap, stops when the privilege ends); admin Topics page (content API) with the spam-wording check (G8 part). api 38 tests; e2e growth 3. |
 | G6 enough quotes, ending notice, next page | HMO | done (with G0) | Onboarding warns before sign-in (`/api/public/config`), server checks again; `/next/:id` loop / extend / new course (validated before the old course is stopped). |
-| G5 payments (Razorpay, Stripe, mock) | HMO | todo | |
+| G5 payments (Razorpay, Stripe, mock) | HMO | done | Server-priced orders; Razorpay checkout signature + webhook, Stripe Checkout + signed webhook (5 min tolerance); atomic fulfil (one grant per order); buyer number per product family → term; VAVP1 n-th unit pricing; waitlist when international is off; renewal banner (3 days). No live keys: owner creates accounts. api 46 tests, e2e upgrade 1. |
 | G7 journal | HMO | todo | |
 | G8/G9 content check, TWA, legal pages | HMO | todo | |
 
@@ -32,3 +32,4 @@ delete-all for the user only; carry on without stopping unless the owner objects
 - 2026-11-20: HMO G0 + G6 built: api 18 tests, e2e 21. Judgement calls: admin api lives under `/api/admin/*` (one proxy prefix); "loop" and "new course" start a new enrolment from today with the same times (the old one is cancelled after every check passes); "extend" raises maxItems on the running one. Next: G1.
 - 2026-11-20: G1 built. Admin identity = signed-in user's verified email in `admins` (ADMIN_OWNER_EMAIL bootstraps). Next: G2+G3.
 - 2026-11-20: G2–G4 built (with the G8 content check). Next: G5 payments.
+- 2026-11-20: G5 built. Renewal reminder is an in-app banner on My notes (not inside notifications). Next: G7 journal.

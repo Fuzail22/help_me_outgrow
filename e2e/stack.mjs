@@ -62,7 +62,7 @@ export async function startStack({ quiet = true } = {}) {
     // 4. Thin backend.
     run('api', join(HMO, 'api', 'node_modules', '.bin', 'tsx'), ['src/index.ts'], join(HMO, 'api'), {
       PORT: String(PORTS.api), SESSION_SECRET: randomBytes(32).toString('hex'), APP_ORIGIN: APP, PLATFORM_API_URL: PLATFORM,
-      PLATFORM_SECRET_KEY: tenant.secretKey, DEV_LOGIN: '1', ADMIN_OWNER_EMAIL: 'owner@dev.invalid', PUBLIC_URL: `http://localhost:${PORTS.api}`,
+      PLATFORM_SECRET_KEY: tenant.secretKey, DEV_LOGIN: '1', PAYMENTS_MOCK: '1', ADMIN_OWNER_EMAIL: 'owner@dev.invalid', PUBLIC_URL: `http://localhost:${PORTS.api}`,
       ...(process.env.HMO_API_EXTRA_ENV ? JSON.parse(process.env.HMO_API_EXTRA_ENV) : {}),
     });
     await waitFor(`http://localhost:${PORTS.api}/auth/healthz`);

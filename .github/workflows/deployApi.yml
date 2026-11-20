@@ -20,17 +20,30 @@ jobs:
           export APP_ORIGIN="https://$APP_DOMAIN"
           ../.github/scripts/sync-fly-secrets.sh
         env:
-          REQUIRED: SESSION_SECRET APP_ORIGIN PLATFORM_API_URL PLATFORM_SECRET_KEY GOOGLE_CLIENT_ID MONGO_URI
-          OPTIONAL: ""
-          PROTECTED: ""
+          REQUIRED: SESSION_SECRET APP_ORIGIN PLATFORM_API_URL PLATFORM_SECRET_KEY GOOGLE_CLIENT_ID MONGO_URI JOURNAL_KEY
+          OPTIONAL: PUBLIC_URL ADMIN_OWNER_EMAIL SUPPORT_EMAIL ZOHO_CLIENT_ID ZOHO_CLIENT_SECRET ZOHO_ACCOUNTS_URL RAZORPAY_KEY_ID RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET
+          # Changing JOURNAL_KEY makes every journal entry unreadable.
+          PROTECTED: JOURNAL_KEY
           # Secrets
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           PLATFORM_SECRET_KEY: ${{ secrets.PLATFORM_SECRET_KEY }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          JOURNAL_KEY: ${{ secrets.JOURNAL_KEY }}
+          ZOHO_CLIENT_SECRET: ${{ secrets.ZOHO_CLIENT_SECRET }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+          RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           # Variables (not secret)
           APP_DOMAIN: ${{ vars.APP_DOMAIN }}
           PLATFORM_API_URL: ${{ vars.PLATFORM_API_URL }}
           GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          PUBLIC_URL: ${{ vars.API_URL }}
+          ADMIN_OWNER_EMAIL: ${{ vars.ADMIN_OWNER_EMAIL }}
+          SUPPORT_EMAIL: ${{ vars.SUPPORT_EMAIL }}
+          ZOHO_CLIENT_ID: ${{ vars.ZOHO_CLIENT_ID }}
+          ZOHO_ACCOUNTS_URL: ${{ vars.ZOHO_ACCOUNTS_URL }}
+          RAZORPAY_KEY_ID: ${{ vars.RAZORPAY_KEY_ID }}
       - name: Deploy
         working-directory: ./api
         run: flyctl deploy --remote-only --ha=false

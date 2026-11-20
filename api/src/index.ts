@@ -5,7 +5,7 @@ import type { Ctx } from './context.js';
 import { createPlatform } from './platform.js';
 import { createMemoryStore } from './store/memory.js';
 import { createMongoStore } from './store/mongo.js';
-import { noPayments } from './payments/index.js';
+import { createPayments } from './payments/index.js';
 import { createZohoSignIn } from './auth/zoho.js';
 
 const env = z.object({
@@ -30,7 +30,17 @@ const env = z.object({
   STORE_FILE: z.string().optional(),
   USERS_FILE: z.string().optional(),
   NODE_ENV: z.string().optional(),
+  /** Razorpay (India: UPI, cards, netbanking, wallets). Test keys start rzp_test_. */
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+  /** Stripe Checkout (outside India). Test keys start sk_test_. */
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  /** Local development and tests only: a fake checkout page instead of a provider. */
+  PAYMENTS_MOCK: z.enum(['0', '1']).optional(),
 }).parse(process.env);
+if (env.PAYMENTS_MOCK === '1' && env.NODE_ENV === 'production') throw new Error('PAYMENTS_MOCK must not be enabled in production');
 const devLogin = env.DEV_LOGIN === '1';
 // The dev login is a password-less sign-in: explicit '1' only, never in production, never next to a real database.
 if (devLogin && (env.NODE_ENV === 'production' || env.MONGO_URI)) throw new Error('DEV_LOGIN must not be enabled in production or with MONGO_URI');
@@ -42,7 +52,11 @@ const store = env.MONGO_URI ? await createMongoStore(env.MONGO_URI) : createMemo
 const ctx = {
   store, now: () => new Date(), log: (l: Record<string, unknown>) => console.log(JSON.stringify({ t: new Date().toISOString(), ...l })),
   platform: createPlatform({ url: env.PLATFORM_API_URL, secretKey: env.PLATFORM_SECRET_KEY }),
-  payments: noPayments,
+  payments: createPayments({
+    razorpay: env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET ? { keyId: env.RAZORPAY_KEY_ID, keySecret: env.RAZORPAY_KEY_SECRET, webhookSecret: env.RAZORPAY_WEBHOOK_SECRET ?? null } : null,
+    stripe: env.STRIPE_SECRET_KEY ? { secretKey: env.STRIPE_SECRET_KEY, webhookSecret: env.STRIPE_WEBHOOK_SECRET ?? null } : null,
+    mockOrigin: env.PAYMENTS_MOCK === '1' ? env.APP_ORIGIN : null,
+  }),
   config: {
     sessionSecret: env.SESSION_SECRET, appOrigin: env.APP_ORIGIN, devLogin, secureCookies: env.APP_ORIGIN.startsWith('https://'),
     adminOwnerEmail: env.ADMIN_OWNER_EMAIL?.toLowerCase() ?? null,

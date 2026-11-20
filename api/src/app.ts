@@ -8,6 +8,7 @@ import { enrolmentRoutes } from './routes/enrolments.js';
 import { adminRoutes } from './admin/routes.js';
 import { growthRoutes, proofAdminRoutes } from './routes/growth.js';
 import { ownTopicRoutes, topicAdminRoutes } from './routes/topics.js';
+import { orderAdminRoutes, upgradeRoutes } from './routes/upgrade.js';
 
 export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => void } = {}) {
   const { config } = ctx;
@@ -45,7 +46,8 @@ export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => voi
   enrolmentRoutes(ctx, api);
   growthRoutes(ctx, api);
   ownTopicRoutes(ctx, api);
-  adminRoutes(ctx, api, [proofAdminRoutes(ctx), topicAdminRoutes(ctx)]);
+  upgradeRoutes(ctx, api);
+  adminRoutes(ctx, api, [proofAdminRoutes(ctx), topicAdminRoutes(ctx), orderAdminRoutes(ctx)]);
   opts.extra?.(api);
   app.use(api);
 
