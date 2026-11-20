@@ -40,3 +40,18 @@ export const formatWhen = (iso: string, tz: string) =>
   new Intl.DateTimeFormat([], { timeZone: tz, weekday: 'long', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(iso));
 export const formatDate = (isoDate: string) =>
   new Intl.DateTimeFormat([], { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(isoDate + 'T00:00:00Z'));
+
+/** How many notes a schedule asks for: every slot on every date from start to end (inclusive). Mirrors the api. */
+export function notesNeeded(slots: Slot[], startDate: string, endDate: string) {
+  const per = new Map<number, number>();
+  for (const s of slots) per.set(s.day, (per.get(s.day) ?? 0) + 1);
+  let n = 0;
+  for (let d = startDate; d <= endDate; d = addDays(d, 1)) { const wd = ((new Date(d + 'T00:00:00Z').getUTCDay() + 6) % 7) + 1; n += per.get(wd) ?? 0; }
+  return n;
+}
+/** The latest end date whose schedule still fits `available` notes (null if even one day is too many). */
+export function lastFittingEnd(slots: Slot[], startDate: string, endDate: string, available: number) {
+  let end = endDate;
+  while (end >= startDate && notesNeeded(slots, startDate, end) > available) end = addDays(end, -1);
+  return end >= startDate ? end : null;
+}

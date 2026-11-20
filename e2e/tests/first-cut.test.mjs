@@ -36,7 +36,7 @@ async function onboard(page, { topic = /Burnt out/, time = '07:00', name } = {})
   await page.getByRole('checkbox').check();
   if (name) await page.route('**/auth/dev', (route) => route.continue({ postData: JSON.stringify({ name }) }));
   await page.getByRole('button', { name: 'Continue as demo user' }).click();
-  const created = page.waitForResponse((r) => r.url().endsWith('/v1/subscribers/me/enrolments') && r.request().method() === 'POST');
+  const created = page.waitForResponse((r) => r.url().endsWith('/api/enrolments') && r.request().method() === 'POST');
   await page.getByRole('button', { name: 'Turn on notifications' }).click();
   const enrolment = await (await created).json();
   await page.getByRole('heading', { name: 'You are set.' }).waitFor();
@@ -151,7 +151,7 @@ test('R1: rating from a notification button records it, opens nothing, and shows
 
   // Rating again replaces the earlier rating (one per delivery).
   await v.push.deliverPending(APP);
-  await (await serviceWorker(v.context)).evaluate(async (d) => self.registration.showNotification('again', { tag: d.deliveryId, data: d, actions: [{ action: 'up', title: 'Helpful' }] }), note.data);
+  await (await serviceWorker(v.context)).evaluate(async ([tag, d]) => self.registration.showNotification('again', { tag, data: d, actions: [{ action: 'up', title: 'Helpful' }] }), [note.tag, note.data]);
   await tapNotification(v.context, note.tag, 'up');
   let last;
   const replaced = await poll(async () => { last = await stack.stats(); return last.ratings.up === after.ratings.up + 1 && last.ratings.down === after.ratings.down - 1; }, 10000);

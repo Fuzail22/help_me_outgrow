@@ -96,7 +96,7 @@ test('inside the Home Screen app the full flow works: sign in, topic and times, 
   await v.page.getByRole('checkbox').check();
   await v.page.route('**/auth/dev', (route) => route.continue({ postData: JSON.stringify({ name: 'iPhone app' }) }));
   await v.page.getByRole('button', { name: 'Continue as demo user' }).click(); // stands in for Google sign-in
-  const created = v.page.waitForResponse((r) => r.url().endsWith('/v1/subscribers/me/enrolments') && r.request().method() === 'POST');
+  const created = v.page.waitForResponse((r) => r.url().endsWith('/api/enrolments') && r.request().method() === 'POST');
   await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
   const enr = await (await created).json();
   await v.page.getByRole('heading', { name: 'You are set.' }).waitFor();
@@ -153,6 +153,8 @@ test('"Stop notes on this device" is never undone by the silent reconnect, even 
   const v = await iphone({ homeScreen: true });
   await chooseNotes(v.page, /Loss/);
   await v.page.getByRole('checkbox').check();
+  // Each test is its own person: one person's topics must be 15 minutes apart (platform policy).
+  await v.page.route('**/auth/dev', (route) => route.continue({ postData: JSON.stringify({ name: 'iPhone stop' }) }));
   await v.page.getByRole('button', { name: 'Continue as demo user' }).click();
   await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
   await v.page.getByRole('heading', { name: 'You are set.' }).waitFor();
@@ -176,8 +178,9 @@ test('image content appears only on the quote page; the notification does not de
   const v = await iphone({ homeScreen: true });
   await chooseNotes(v.page, /Low mood/);
   await v.page.getByRole('checkbox').check();
+  await v.page.route('**/auth/dev', (route) => route.continue({ postData: JSON.stringify({ name: 'iPhone image' }) }));
   await v.page.getByRole('button', { name: 'Continue as demo user' }).click();
-  const created = v.page.waitForResponse((r) => r.url().endsWith('/v1/subscribers/me/enrolments') && r.request().method() === 'POST');
+  const created = v.page.waitForResponse((r) => r.url().endsWith('/api/enrolments') && r.request().method() === 'POST');
   await v.page.getByRole('button', { name: 'Turn on notifications' }).click();
   const enr = await (await created).json();
   await stack.tick(enr.nextSendAt);

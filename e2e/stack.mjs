@@ -53,7 +53,7 @@ export async function startStack({ quiet = true } = {}) {
     const tsx = join(NS, 'server', 'node_modules', '.bin', 'tsx');
     // 1. Tenant with its own VAPID pair and keys, exactly as an operator would create it.
     const tenant = JSON.parse(execFileSync(tsx, ['scripts/bootstrap-tenant.ts', '--name', 'help me outgrow', '--slug', 'hmo', '--origin', APP,
-      '--click-url', `${APP}/n/{deliveryId}?t={token}`, '--icon', '/icons/192.png'], { cwd: join(NS, 'server'), env: { ...process.env, ...platformEnv }, stdio: ['ignore', 'pipe', 'ignore'] }).toString());
+      '--click-url', `${APP}/n/{deliveryId}?t={token}`, '--icon', '/icons/192.png', '--privileged'], { cwd: join(NS, 'server'), env: { ...process.env, ...platformEnv }, stdio: ['ignore', 'pipe', 'ignore'] }).toString());
     // 2. Platform.
     run('platform', tsx, ['src/index.ts'], join(NS, 'server'), platformEnv);
     await waitFor(`${PLATFORM}/healthz`);

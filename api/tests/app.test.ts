@@ -1,19 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { createApp, type Deps } from '../src/app.js';
-import { createFileUserStore } from '../src/users.js';
+import { createApp } from '../src/app.js';
+import { makeCtx, ORIGIN } from './helpers.js';
 
-const ORIGIN = 'https://app.example.test';
-function make(over: Partial<Deps['config']> = {}) {
-  const exchanged: string[] = [];
-  const users = createFileUserStore();
-  const app = createApp({
-    users,
-    verifyGoogle: async (c) => { if (c !== 'valid-google-credential-token') throw new Error('bad'); return { googleId: 'g-123', email: 'asha@example.test', name: 'Asha' }; },
-    platformToken: async (externalId) => { exchanged.push(externalId); return { token: 'platform.jwt.token', expiresIn: 3600 }; },
-    config: { sessionSecret: 's'.repeat(40), appOrigin: ORIGIN, devLogin: false, secureCookies: true, ...over },
-  });
-  return { app, users, exchanged };
+function make(over: { devLogin?: boolean } = {}) {
+  const m = makeCtx({ devLogin: false, ...over });
+  const app = createApp(m.ctx);
+  return { app, store: m.ctx.store, exchanged: m.platform.tokens };
 }
 const signIn = async (app: any) => {
   const r = await request(app).post('/auth/google').set('origin', ORIGIN).send({ credential: 'valid-google-credential-token' }).expect(200);
@@ -65,12 +58,12 @@ describe('thin backend', () => {
     expect(r.body.user).toMatchObject({ name: 'Demo User', email: 'demo-user@dev.invalid' });
   });
   it('logs out, deletes the account, and rejects a tampered cookie', async () => {
-    const { app, users } = make(); const s = await signIn(app);
+    const { app, store } = make(); const s = await signIn(app);
     await request(app).get('/auth/me').set('cookie', s.cookie.slice(0, -3) + 'abc').expect(401);
     const out = await request(app).post('/auth/logout').set('cookie', s.cookie).expect(204);
     expect(out.headers['set-cookie'][0]).toMatch(/hmo_session=;/);
     await request(app).delete('/auth/me').set('cookie', s.cookie).set('origin', ORIGIN).expect(204);
-    expect(await users.get(s.user.id)).toBeNull();
+    expect(await store.users.findOne({ _id: s.user.id })).toBeNull();
     await request(app).get('/auth/me').set('cookie', s.cookie).expect(401);
   });
 });

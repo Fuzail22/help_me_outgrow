@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   base: '/',
-  server: { port: 5173, strictPort: true, proxy: { '/auth': process.env.API_PROXY ?? 'http://localhost:8787' } },
-  preview: { port: 5173, strictPort: true, proxy: { '/auth': process.env.API_PROXY ?? 'http://localhost:8787' } },
+  // Local runs serve the api on the same origin: /auth (sign-in) and /api (everything else, admin included).
+  server: { port: 5173, strictPort: true, proxy: { '/auth': process.env.API_PROXY ?? 'http://localhost:8787', '/api': process.env.API_PROXY ?? 'http://localhost:8787' } },
+  preview: { port: 5173, strictPort: true, proxy: { '/auth': process.env.API_PROXY ?? 'http://localhost:8787', '/api': process.env.API_PROXY ?? 'http://localhost:8787' } },
 });

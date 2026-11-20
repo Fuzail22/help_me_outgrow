@@ -9,6 +9,7 @@ import { Onboard } from './pages/Onboard';
 import { Manage } from './pages/Manage';
 import { Quote } from './pages/Quote';
 import { Privacy } from './pages/Privacy';
+import { Next } from './pages/Next';
 import './styles.css';
 
 // Deep link restored by 404.html on static hosts without rewrite rules.
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/manage" element={<Manage />} />
             <Route path="/n/:deliveryId" element={<Quote />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/next/:id" element={<Next />} />
             <Route path="*" element={<Landing />} />
           </Routes>
         </Layout>
