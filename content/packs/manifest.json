@@ -543,7 +543,7 @@
           "sensitive": false,
           "file": "csv/after-redundancy.csv",
           "lines": 92,
-          "firstLine": ""
+          "firstLine": "Welcome. Over about ninety days you will get one short note a day to help you steady yourself and hold on to your worth after losing a job."
         },
         {
           "slug": "deep-work",
@@ -552,7 +552,7 @@
           "sensitive": false,
           "file": "csv/deep-work.csv",
           "lines": 92,
-          "firstLine": ""
+          "firstLine": "Welcome. Over about ninety days you will get one short note a day to help you step away from constant switching and grow into calm, unhurried focus."
         },
         {
           "slug": "second-language",
@@ -561,7 +561,7 @@
           "sensitive": false,
           "file": "csv/second-language.csv",
           "lines": 92,
-          "firstLine": ""
+          "firstLine": "Welcome. For roughly ninety days you will receive one short note a day to help a new language settle into your life, a few minutes and one small habit at a time."
         },
         {
           "slug": "new-language-of-feelings",
@@ -570,7 +570,7 @@
           "sensitive": false,
           "file": "csv/new-language-of-feelings.csv",
           "lines": 92,
-          "firstLine": ""
+          "firstLine": "Welcome. For about ninety days you will get one short note a day to help you move past fine and stressed, and find words for what you actually feel."
         },
         {
           "slug": "digital-creator",
@@ -579,7 +579,7 @@
           "sensitive": false,
           "file": "csv/digital-creator.csv",
           "lines": 92,
-          "firstLine": ""
+          "firstLine": "Welcome. Over about ninety days you will get one short note a day to help you share your writing, art or ideas with the world, a little at a time."
         },
         {
           "slug": "playful-adult",
@@ -588,7 +588,7 @@
           "sensitive": false,
           "file": "csv/playful-adult.csv",
           "lines": 92,
-          "firstLine": ""
+          "firstLine": "Welcome. Over about ninety days you will get one short note a day to help you make room for fun, silliness and play again."
         }
       ]
     }
