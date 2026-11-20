@@ -650,6 +650,65 @@
           "firstLine": "Welcome. For the next ninety days or so, one short note a day will help you put down roots where you live and slowly become part of your neighbourhood."
         }
       ]
+    },
+    {
+      "date": "2026-11-20-run12",
+      "topics": [
+        {
+          "slug": "caregiver-self",
+          "title": "Keeping yourself while caring for a parent",
+          "description": "For staying yourself while caring for an ageing or unwell parent: rest, help, limits and a life of your own.",
+          "sensitive": false,
+          "file": "csv/caregiver-self.csv",
+          "lines": 92,
+          "firstLine": "For the next ninety days or so, one short note a day will keep you company while you care for a parent, and help you hold on to the person you are outside that role."
+        },
+        {
+          "slug": "sober-curious",
+          "title": "Becoming someone who drinks less",
+          "description": "For drinking less, or not at all, out of curiosity rather than fear. Not medical advice.",
+          "sensitive": false,
+          "file": "csv/sober-curious.csv",
+          "lines": 92,
+          "firstLine": "Hello. Over the next three months, a daily note will help you become someone who drinks less, at your own pace. This is not medical advice; if stopping feels hard or unsafe, please speak to a doctor first."
+        },
+        {
+          "slug": "quiet-confidence",
+          "title": "Feeling confident without being loud",
+          "description": "For quieter people learning to take up space, speak up and trust their own steady presence.",
+          "sensitive": false,
+          "file": "csv/quiet-confidence.csv",
+          "lines": 92,
+          "firstLine": "Welcome. For about ninety days, a short note each day will help you feel sure of yourself without needing to be the loudest person in the room."
+        },
+        {
+          "slug": "letter-writer",
+          "title": "Becoming someone who keeps in touch",
+          "description": "For becoming the friend and relative who reaches out first, with messages, calls and the odd letter.",
+          "sensitive": false,
+          "file": "csv/letter-writer.csv",
+          "lines": 92,
+          "firstLine": "Hi. For the next ninety days, a small daily note will help you become someone who keeps in touch with the people who matter, through messages, calls and the occasional letter."
+        },
+        {
+          "slug": "less-reactive-online",
+          "title": "Stepping back from online arguments",
+          "description": "For outgrowing the pull of comment-section fights and spending your attention where it matters.",
+          "sensitive": false,
+          "file": "csv/less-reactive-online.csv",
+          "lines": 92,
+          "firstLine": "Welcome. Over roughly ninety days, a short daily note will help you step back from online arguments and spend your attention on what matters to you."
+        },
+        {
+          "slug": "after-friendship-ends",
+          "title": "Moving on when a friendship ends",
+          "description": "For grieving a friendship that has ended and opening up to the friendships ahead.",
+          "sensitive": false,
+          "file": "csv/after-friendship-ends.csv",
+          "lines": 92,
+          "firstLine": "Hello. For about ninety days, a gentle note each day will keep you company as you move on from a friendship that has ended, and help you open up to the friendships ahead."
+        }
+      ]
     }
   ]
 }

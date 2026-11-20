@@ -130,3 +130,13 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - cook-for-others: Becoming someone who hosts and feeds people
 - money-saver-identity: Becoming someone who saves a little each month (not financial advice)
 - thoughtful-gift-giver: Becoming someone who notices what people need
+
+## Added by run 12 (unused ideas)
+- grandparent-new: Growing into being a grandparent
+- after-long-illness: Finding your footing after a long illness (not medical advice)
+- step-parent: Settling into life as a step-parent
+- money-boundaries-friends: Saying no to lending money kindly (not financial advice)
+- pace-of-life-rural: Adjusting to a quieter life in the countryside
+- returning-home: Moving back in with family as an adult
+- kinder-to-strangers: Becoming someone who notices and helps strangers
+- calm-traveller: Becoming a calmer traveller
