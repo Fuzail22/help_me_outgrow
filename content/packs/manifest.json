@@ -532,6 +532,65 @@
           "firstLine": "Welcome. Over about ninety days you will get one short note a day to help small talk feel lighter, easier, and perhaps even enjoyable."
         }
       ]
+    },
+    {
+      "date": "2026-11-20-run10",
+      "topics": [
+        {
+          "slug": "after-redundancy",
+          "title": "Rebuilding after losing a job",
+          "description": "For steadying yourself and your sense of worth after redundancy or being let go (not career or financial advice).",
+          "sensitive": false,
+          "file": "csv/after-redundancy.csv",
+          "lines": 92,
+          "firstLine": ""
+        },
+        {
+          "slug": "deep-work",
+          "title": "Becoming someone who can focus for an hour",
+          "description": "For outgrowing constant switching and distraction, and growing into deep, unhurried focus.",
+          "sensitive": false,
+          "file": "csv/deep-work.csv",
+          "lines": 92,
+          "firstLine": ""
+        },
+        {
+          "slug": "second-language",
+          "title": "Becoming someone who speaks another language",
+          "description": "For learning a new language as an adult, one small daily habit at a time.",
+          "sensitive": false,
+          "file": "csv/second-language.csv",
+          "lines": 92,
+          "firstLine": ""
+        },
+        {
+          "slug": "new-language-of-feelings",
+          "title": "Naming your feelings",
+          "description": "For outgrowing \"fine\" and \"stressed\", and learning to notice and name what you actually feel.",
+          "sensitive": false,
+          "file": "csv/new-language-of-feelings.csv",
+          "lines": 92,
+          "firstLine": ""
+        },
+        {
+          "slug": "digital-creator",
+          "title": "Sharing your work publicly for the first time",
+          "description": "For outgrowing the fear of being seen and putting your writing, art or ideas out into the world.",
+          "sensitive": false,
+          "file": "csv/digital-creator.csv",
+          "lines": 92,
+          "firstLine": ""
+        },
+        {
+          "slug": "playful-adult",
+          "title": "Letting yourself play again as an adult",
+          "description": "For outgrowing all-work seriousness and making room for fun, silliness and play.",
+          "sensitive": false,
+          "file": "csv/playful-adult.csv",
+          "lines": 92,
+          "firstLine": ""
+        }
+      ]
     }
   ]
 }

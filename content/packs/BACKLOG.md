@@ -110,3 +110,13 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - night-owl-peace: Making peace with your natural rhythm
 - public-mistakes: Owning mistakes openly at work
 - playful-adult: Letting yourself play again as an adult
+
+## Added by run 10 (unused ideas)
+- clutter-free: Letting go of things you no longer need
+- calm-driver: Becoming a calmer, more patient driver
+- reliable-friend: Becoming someone who shows up for friends
+- after-burnout-return: Going back to work after time off
+- unhurried-eater: Eating slowly and paying attention (not diet advice)
+- open-minded: Changing your mind gracefully
+- local-roots: Becoming part of your neighbourhood
+- self-trust: Trusting your own judgement again
