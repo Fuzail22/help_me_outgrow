@@ -6,6 +6,7 @@ import { createPlatform } from './platform.js';
 import { createMemoryStore } from './store/memory.js';
 import { createMongoStore } from './store/mongo.js';
 import { noPayments } from './payments/index.js';
+import { createZohoSignIn } from './auth/zoho.js';
 
 const env = z.object({
   PORT: z.coerce.number().default(8787),
@@ -57,7 +58,8 @@ const ctx = {
     if (!p?.sub || !p.email) throw new Error('unverified');
     return { sub: p.sub, email: p.email, name: p.name ?? p.email.split('@')[0], emailVerified: !!p.email_verified };
   },
-  async zohoSignIn() { throw new Error('Zoho sign-in is not configured'); },
 } as Ctx;
+const zoho = createZohoSignIn(() => ctx.config.zoho, { now: () => new Date() });
+ctx.zohoSignIn = async (input) => { const z = await zoho(input); return { sub: z.sub, email: z.email, name: z.name ?? z.email.split('@')[0], emailVerified: z.emailVerified }; };
 const app = createApp(ctx);
 app.listen(env.PORT, () => console.log(JSON.stringify({ msg: 'listening', port: env.PORT, devLogin })));

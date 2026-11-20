@@ -18,7 +18,7 @@ delete-all for the user only; carry on without stopping unless the owner objects
 | P5–P6 delivery: buttons, tag, title, ending notice, maxItems, loop, gap, cap, snooze; SDK 0.6.0 | NS | done | `8dd333f`. Gap = atomic per-person reservation at send time + check at enrolment time. Ending notice: `{daysLeft}`, `{daysLeftText}`. |
 | P7 console: policy page, read-only topics, slots removed, Zoho | NS | done | `c81b608`. Judgement call: console content edits kept for operators (emergency), with the tenant role still applied; legacy slot page operator+owner. NS server 154 tests, e2e 20. |
 | G0 enrolments through the backend, store, limits | HMO | done | Generic store (memory/mongo), 0.5 user docs migrated on read, settings docs (limits/growth/pricing), `/api/me/limits`, `/api/enrolments`, SDK 0.6.0 vendored. hmo e2e: bootstrap without `--browser-enrolments`. Note: e2e must use the global Playwright (no local `npm install` in e2e). |
-| G1 Zoho, admin roles, audit | HMO | todo | |
+| G1 Zoho, admin roles, audit | HMO | done | Zoho OIDC code+PKCE for app users (same verified email = one account); admin at `/admin` (lazy chunk), roles owner/editor/support/viewer, `x-admin` CSRF header, audit log; settings screens with explanations and price preview. api 27 tests, e2e admin 1. |
 | G2+G3 levels, celebration, referrals, proofs | HMO | todo | |
 | G4 VAVP1/2/3 | HMO | todo | |
 | G6 enough quotes, ending notice, next page | HMO | done (with G0) | Onboarding warns before sign-in (`/api/public/config`), server checks again; `/next/:id` loop / extend / new course (validated before the old course is stopped). |
@@ -30,3 +30,4 @@ delete-all for the user only; carry on without stopping unless the owner objects
 - 2026-11-20: design written and pushed for review.
 - 2026-11-20: notification-service v2 (P1–P7) built and pushed. Next: HMO G0.
 - 2026-11-20: HMO G0 + G6 built: api 18 tests, e2e 21. Judgement calls: admin api lives under `/api/admin/*` (one proxy prefix); "loop" and "new course" start a new enrolment from today with the same times (the old one is cancelled after every check passes); "extend" raises maxItems on the running one. Next: G1.
+- 2026-11-20: G1 built. Admin identity = signed-in user's verified email in `admins` (ADMIN_OWNER_EMAIL bootstraps). Next: G2+G3.

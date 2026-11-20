@@ -5,6 +5,7 @@ import { HttpError } from './http.js';
 import { PlatformError } from './platform.js';
 import { authRoutes } from './routes/auth.js';
 import { enrolmentRoutes } from './routes/enrolments.js';
+import { adminRoutes } from './admin/routes.js';
 
 export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => void } = {}) {
   const { config } = ctx;
@@ -40,6 +41,7 @@ export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => voi
   const api = express.Router();
   authRoutes(ctx, api);
   enrolmentRoutes(ctx, api);
+  adminRoutes(ctx, api);
   opts.extra?.(api);
   app.use(api);
 

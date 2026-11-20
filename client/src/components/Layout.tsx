@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { HELPLINE_URL } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { Reconnect } from './Reconnect';
@@ -15,8 +15,9 @@ export function CareNote() {
 
 export function Layout({ children }: { children: ReactNode }) {
   const { user } = useSession();
+  const wide = useLocation().pathname.startsWith('/admin');
   return (
-    <div className="shell">
+    <div className={'shell' + (wide ? ' wide' : '')}>
       <header className="top">
         <Link to="/" className="brand"><img src="/icons/icon.svg" alt="" width="28" height="28" /> help me outgrow</Link>
         <nav>{user ? <Link to="/manage">My notes</Link> : <Link to="/manage">Sign in</Link>}</nav>

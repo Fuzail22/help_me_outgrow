@@ -13,11 +13,14 @@ function loadGoogle(): Promise<void> {
   });
 }
 
-/** Google sign-in is the only account path. The dev button exists only in local builds. */
-export function SignIn({ onSignedIn }: { onSignedIn: (u: User) => void }) {
+let zohoConfigured: Promise<boolean> | null = null;
+/** Google (one tap) or Zoho (a redirect and back). The dev button exists only in local builds. */
+export function SignIn({ onSignedIn, next }: { onSignedIn: (u: User) => void; next?: string }) {
   const holder = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [zoho, setZoho] = useState(false);
+  useEffect(() => { (zohoConfigured ??= auth.config().then((c) => c.zoho).catch(() => false)).then(setZoho); }, []);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
@@ -39,13 +42,14 @@ export function SignIn({ onSignedIn }: { onSignedIn: (u: User) => void }) {
   return (
     <div className="signin">
       {GOOGLE_CLIENT_ID && <div ref={holder} aria-busy={busy} />}
+      {zoho && <a className="btn secondary" href={auth.zohoUrl(next ?? location.pathname + location.search)}>Continue with Zoho</a>}
       {DEV_LOGIN && (
         <button className="btn secondary" disabled={busy} onClick={async () => {
           setBusy(true); setError(null);
           try { onSignedIn(await auth.dev('Demo user')); } catch { setError('Sign-in failed.'); } finally { setBusy(false); }
         }}>Continue as demo user</button>
       )}
-      {!GOOGLE_CLIENT_ID && !DEV_LOGIN && <p className="error" role="alert">Sign-in is not configured for this build.</p>}
+      {!GOOGLE_CLIENT_ID && !DEV_LOGIN && !zoho && <p className="error" role="alert">Sign-in is not configured for this build.</p>}
       {error && <p className="error" role="alert">{error}</p>}
     </div>
   );
