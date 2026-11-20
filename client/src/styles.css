@@ -121,3 +121,20 @@ dialog.celebrate[open] { animation: pop 0.35s ease-out; } @keyframes pop { from 
 .own-lines { padding-left: 22px; } .own-lines li { margin: 6px 0; }
 input[type='text'], .field input { width: 100%; }
 .product .price { font-size: 20px; font-weight: 700; color: var(--ink); } .product .btn { justify-self: start; margin-top: 6px; }
+
+/* journal: one calm column */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.journal .compose { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 12px; }
+.journal textarea { width: 100%; border: 0; background: transparent; font: 18px/1.6 Georgia, 'Times New Roman', serif; resize: vertical; padding: 4px 2px; min-height: 140px; }
+.journal textarea:focus-visible { outline: none; } .journal .compose:focus-within { border-color: var(--accent); }
+.about { font-size: 18px; margin: 0; padding-left: 12px; border-left: 3px solid var(--accent); display: grid; gap: 2px; }
+.small-quote { font-size: 15px; margin: 6px 0; }
+.moods { display: flex; gap: 10px; align-items: center; }
+.mood { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); background: transparent; cursor: pointer; padding: 0; }
+.mood.m1 { --c: #8a7fb0; } .mood.m2 { --c: #7f9bb0; } .mood.m3 { --c: #a9a9a9; } .mood.m4 { --c: #7fb09a; } .mood.m5 { --c: #d0a85c; }
+.mood.on { background: var(--c); border-color: var(--c); } .mood.small-dot { width: 12px; height: 12px; cursor: default; }
+.entries { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 14px; }
+.entries li { border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.entry-text { white-space: pre-wrap; font-family: Georgia, 'Times New Roman', serif; font-size: 17px; margin: 6px 0; }
+.journal-more { margin-top: 22px; } .journal-more summary { cursor: pointer; font-weight: 600; }
+.bar { display: inline-block; height: 10px; border-radius: 6px; background: var(--accent); }

@@ -84,6 +84,7 @@ export function Quote() {
           </div>
         </div>
       )}
+      <p><Link className="btn secondary" to={`/journal/new?d=${d.id}`}>Write about this in my journal</Link></p>
       <p className="muted small"><Link to="/manage">Change or stop my notes</Link></p>
     </section>
   );

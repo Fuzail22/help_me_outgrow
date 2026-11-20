@@ -22,6 +22,7 @@ export async function actionsFor(ctx: Ctx, user: User, topicId: string): Promise
   const r = await ctx.store.journalReminders.findOne({ _id: user._id });
   if (r?.tiedTopicId !== topicId) return null;
   return [FEEDBACK_ACTIONS[0], { id: 'journal', title: 'Journal on this', kind: 'open', url: `${ctx.config.appOrigin}/journal/new?d={deliveryId}` }];
+  // (same button as the journal's own reminders use: routes/journal.ts setTie)
 }
 
 export async function endingNoticeFor(ctx: Ctx, enrolmentId: string, notice: { withinDays: number; text: string }) {

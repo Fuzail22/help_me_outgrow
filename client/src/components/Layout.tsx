@@ -21,7 +21,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className={'shell' + (wide ? ' wide' : '')}>
       <header className="top">
         <Link to="/" className="brand"><img src="/icons/icon.svg" alt="" width="28" height="28" /> help me outgrow</Link>
-        <nav className="topnav">{user ? <><Link to="/manage">My notes</Link><Link to="/growth">Grow</Link></> : <Link to="/manage">Sign in</Link>}</nav>
+        <nav className="topnav">{user ? <><Link to="/manage">My notes</Link><Link to="/journal">Journal</Link><Link to="/growth">Grow</Link></> : <Link to="/manage">Sign in</Link>}</nav>
       </header>
       <Reconnect />
       <Celebrate />

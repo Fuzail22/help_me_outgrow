@@ -111,12 +111,13 @@ describe('G1: admin roles and audit', () => {
     expect(limits).toMatchObject({ isDefault: true, data: { baseItems: 90, maxDurationDays: 92 }, platform: { maxDurationDays: 366 } });
     expect((await owner.put('/api/admin/settings/limits', { ...limits.data, baseLadder: [{ minDays: 5, maxSlots: 3 }] }).set(W).expect(422)).body.error.code).toBe('invalid_settings');
     expect((await owner.put('/api/admin/settings/limits', { ...limits.data, maxDurationDays: 400 }).set(W).expect(422)).body.error.message).toMatch(/366/);
-    await owner.put('/api/admin/settings/limits', { ...limits.data, baseItems: 100 }).set(W).expect(200);
+    await owner.put('/api/admin/settings/limits', { ...limits.data, baseItems: 99 }).set(W).expect(200);
+    await owner.put('/api/admin/settings/limits', { ...limits.data, baseItems: 100 }).set(W).expect(200); // a second save updates
     const growth = (await owner.get('/api/admin/settings/growth').expect(200)).body.data;
     await owner.put('/api/admin/settings/growth', { ...growth, levels: [...growth.levels, { level: 3, mode: 'all', tasks: [{ type: 'referral_signups', count: 3 }] }] }).set(W).expect(200);
     const log = (await owner.get('/api/admin/audit').expect(200)).body.entries;
-    expect(log.map((e: any) => e.action)).toEqual(['settings.growth', 'settings.limits']);
-    expect(log[1]).toMatchObject({ actor: 'owner@dev.invalid', before: { baseItems: 90 }, after: { baseItems: 100 } });
+    expect(log.map((e: any) => e.action)).toEqual(['settings.growth', 'settings.limits', 'settings.limits']);
+    expect(log[1]).toMatchObject({ actor: 'owner@dev.invalid', before: { baseItems: 99 }, after: { baseItems: 100 } });
     const u = await s.signIn('Person');
     const loss = s.platform.addTopic({ slug: 'loss' });
     expect((await s.as(u.cookie).get('/api/me/limits').expect(200)).body.perTopic[loss._id].maxItems).toBe(100);

@@ -23,7 +23,7 @@ delete-all for the user only; carry on without stopping unless the owner objects
 | G4 VAVP1/2/3 | HMO | done | VAVP1/2 via entitlements (VAVP2 also patches running courses); VAVP3 own topics (private platform topic, public after editor review, 150-line cap, stops when the privilege ends); admin Topics page (content API) with the spam-wording check (G8 part). api 38 tests; e2e growth 3. |
 | G6 enough quotes, ending notice, next page | HMO | done (with G0) | Onboarding warns before sign-in (`/api/public/config`), server checks again; `/next/:id` loop / extend / new course (validated before the old course is stopped). |
 | G5 payments (Razorpay, Stripe, mock) | HMO | done | Server-priced orders; Razorpay checkout signature + webhook, Stripe Checkout + signed webhook (5 min tolerance); atomic fulfil (one grant per order); buyer number per product family → term; VAVP1 n-th unit pricing; waitlist when international is off; renewal banner (3 days). No live keys: owner creates accounts. api 46 tests, e2e upgrade 1. |
-| G7 journal | HMO | todo | |
+| G7 journal | HMO | done | AES-256-GCM per person (HKDF of JOURNAL_KEY + user id, AAD = user id); export JSON/Markdown and typed delete-all for the user only; admin sees counts/dates; reminders: own times = looping enrolment on the shared private `journal-prompts` topic (Write now / Later snooze), or tie = "Journal on this" button on a quote topic (no extra notification). Fixed: `$set` with `_id` failed on a second settings save. api 52, e2e journal 1. |
 | G8/G9 content check, TWA, legal pages | HMO | todo | |
 
 ## Log
@@ -33,3 +33,4 @@ delete-all for the user only; carry on without stopping unless the owner objects
 - 2026-11-20: G1 built. Admin identity = signed-in user's verified email in `admins` (ADMIN_OWNER_EMAIL bootstraps). Next: G2+G3.
 - 2026-11-20: G2–G4 built (with the G8 content check). Next: G5 payments.
 - 2026-11-20: G5 built. Renewal reminder is an in-app banner on My notes (not inside notifications). Next: G7 journal.
+- 2026-11-20: G7 built. Next: G8/G9 (TWA, legal pages), then full regression and docs.

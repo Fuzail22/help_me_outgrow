@@ -14,6 +14,7 @@ import { SignInPage } from './pages/SignInPage';
 import { Growth, Referral } from './pages/Growth';
 import { OwnTopic } from './pages/OwnTopic';
 import { MockCheckout, Upgrade, UpgradeDone } from './pages/Upgrade';
+import { Journal } from './pages/Journal';
 
 // The admin is loaded only when someone opens it.
 const Admin = lazy(() => import('./admin/Admin'));
@@ -43,6 +44,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/growth" element={<Growth />} />
             <Route path="/r/:code" element={<Referral />} />
             <Route path="/my-topic" element={<OwnTopic />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/journal/new" element={<Journal />} />
             <Route path="/upgrade" element={<Upgrade />} />
             <Route path="/upgrade/done" element={<UpgradeDone />} />
             <Route path="/upgrade/mock/:id" element={<MockCheckout />} />

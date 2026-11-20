@@ -91,6 +91,7 @@ export async function putSettings(ctx: Ctx, id: SettingsId, data: unknown, actor
   if (!r.success) throw new HttpError(422, 'invalid_settings', r.error.issues[0]?.message ?? 'Invalid settings', r.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })));
   const before = await getSettings(ctx, id);
   const doc: SettingsDoc = { _id: id, data: r.data as Record<string, unknown>, updatedAt: ctx.now(), updatedBy: actor };
-  if (!(await ctx.store.settings.updateOne({ _id: id }, { $set: doc }))) await ctx.store.settings.insertOne(doc);
+  const { _id: _ignored, ...fields } = doc;
+  if (!(await ctx.store.settings.updateOne({ _id: id }, { $set: fields }))) await ctx.store.settings.insertOne(doc);
   return { before, after: r.data };
 }
