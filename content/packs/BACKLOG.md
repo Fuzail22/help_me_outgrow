@@ -120,3 +120,13 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - open-minded: Changing your mind gracefully
 - local-roots: Becoming part of your neighbourhood
 - self-trust: Trusting your own judgement again
+
+## Added by run 11 (unused ideas)
+- gentle-runner: Becoming someone who runs, slowly and happily (not medical advice)
+- letter-writer: Becoming someone who keeps in touch
+- less-reactive-online: Stepping back from online arguments
+- second-act-career-50: Starting something new after fifty
+- quiet-confidence: Feeling confident without being loud
+- cook-for-others: Becoming someone who hosts and feeds people
+- money-saver-identity: Becoming someone who saves a little each month (not financial advice)
+- thoughtful-gift-giver: Becoming someone who notices what people need
