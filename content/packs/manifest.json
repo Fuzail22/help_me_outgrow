@@ -414,6 +414,65 @@
           "firstLine": "Wanting things to happen faster is very human, and it can make ordinary days feel tense. For the next ninety days or so, these notes offer small ways to loosen that hurry and find a calmer pace."
         }
       ]
+    },
+    {
+      "date": "2026-11-20-run8",
+      "topics": [
+        {
+          "slug": "purpose",
+          "title": "Finding what matters to you",
+          "description": "For working out your values and letting them shape more of your days.",
+          "sensitive": false,
+          "file": "csv/purpose.csv",
+          "lines": 92,
+          "firstLine": "Most of us drift into our days rather than choose them. This is the first of ninety-odd short notes about working out what matters to you, and letting that shape a few more of your hours."
+        },
+        {
+          "slug": "decisive",
+          "title": "Becoming someone who makes decisions",
+          "description": "For outgrowing dithering, endless research and the fear of choosing wrong.",
+          "sensitive": false,
+          "file": "csv/decisive.csv",
+          "lines": 92,
+          "firstLine": "Choosing can feel like a test with one right answer hidden somewhere. For the next ninety days, one line a day will help you practise deciding with less dread and more trust in yourself."
+        },
+        {
+          "slug": "imposter-feelings",
+          "title": "Feeling like you belong at work",
+          "description": "For outgrowing imposter feelings and the fear of being found out.",
+          "sensitive": false,
+          "file": "csv/imposter-feelings.csv",
+          "lines": 92,
+          "firstLine": "Feeling like a fraud at work is common, and it tends to ease with practice. For the next ninety days, expect one short note a day to help you settle into the place you have earned."
+        },
+        {
+          "slug": "saying-yes",
+          "title": "Saying yes to new experiences",
+          "description": "For stepping outside your comfort zone and becoming someone who tries new things.",
+          "sensitive": false,
+          "file": "csv/saying-yes.csv",
+          "lines": 92,
+          "firstLine": "Trying new things gets easier with practice, and your comfort zone can widen a little at a time. Over the next ninety days, one short daily note will help you say yes more often."
+        },
+        {
+          "slug": "slow-living",
+          "title": "Outgrowing constant busyness",
+          "description": "For slowing down, doing fewer things more fully and resting without guilt.",
+          "sensitive": false,
+          "file": "csv/slow-living.csv",
+          "lines": 92,
+          "firstLine": "Welcome. If your days feel crammed and rushed, you are in the right place. For roughly ninety days, one short note a day will invite you to slow down and do fewer things more fully."
+        },
+        {
+          "slug": "honest-self",
+          "title": "Saying what you really think, kindly",
+          "description": "For outgrowing hidden opinions and white lies, and speaking honestly with warmth.",
+          "sensitive": false,
+          "file": "csv/honest-self.csv",
+          "lines": 92,
+          "firstLine": "Welcome. If you often swallow your real opinion or reach for a small white lie to keep the peace, these notes are for you. For about ninety days, one line a day will help you say what you think, kindly."
+        }
+      ]
     }
   ]
 }
