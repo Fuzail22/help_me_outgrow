@@ -100,3 +100,13 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - new-team-member: Settling into a new job
 - after-friendship-ends: Moving on when a friendship ends
 - small-talk: Becoming comfortable with small talk
+
+## Added by run 9 (unused ideas)
+- envy-to-admiration: Turning envy into admiration and learning
+- weekend-reset: Becoming someone whose weekends restore them
+- deep-work: Becoming someone who can focus for an hour
+- grudge-free-siblings: Growing up alongside your siblings again
+- spending-mindful: Buying less and choosing well (not financial advice)
+- night-owl-peace: Making peace with your natural rhythm
+- public-mistakes: Owning mistakes openly at work
+- playful-adult: Letting yourself play again as an adult
