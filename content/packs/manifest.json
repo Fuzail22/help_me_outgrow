@@ -355,6 +355,65 @@
           "firstLine": "Gratitude does not mean pretending everything is fine. Over roughly ninety days, these notes will help you notice what is good alongside whatever is hard."
         }
       ]
+    },
+    {
+      "date": "2026-11-20",
+      "topics": [
+        {
+          "slug": "discipline-kind",
+          "title": "Kind discipline: keeping promises to yourself",
+          "description": "For building self-discipline gently, one small kept promise at a time.",
+          "sensitive": false,
+          "file": "csv/discipline-kind.csv",
+          "lines": 92,
+          "firstLine": "These next ninety or so days are about a quieter kind of discipline: keeping small promises to yourself, gently, until your own word starts to feel trustworthy again."
+        },
+        {
+          "slug": "courage-small",
+          "title": "Small acts of courage",
+          "description": "For outgrowing playing it safe through small brave acts, practised daily.",
+          "sensitive": false,
+          "file": "csv/courage-small.csv",
+          "lines": 92,
+          "firstLine": "Welcome to roughly three months of small brave acts. Nothing dramatic is required, just a little more courage than yesterday, practised a day at a time."
+        },
+        {
+          "slug": "presence",
+          "title": "Living more in the present",
+          "description": "For outgrowing autopilot and rushing ahead, and being here for your own life.",
+          "sensitive": false,
+          "file": "csv/presence.csv",
+          "lines": 92,
+          "firstLine": "Rushing ahead can become a habit so quiet you stop seeing it. For about ninety days, these notes will invite you back into the hours you are actually living."
+        },
+        {
+          "slug": "resilience",
+          "title": "Bouncing back from setbacks",
+          "description": "For recovering from disappointment, rejection and failure more steadily.",
+          "sensitive": false,
+          "file": "csv/resilience.csv",
+          "lines": 92,
+          "firstLine": "Setbacks reach every life, and recovering from them is a skill that can grow. Across the coming ninety or so days, these notes will help you find your footing more steadily."
+        },
+        {
+          "slug": "speaking-up",
+          "title": "Finding your voice in meetings and groups",
+          "description": "For outgrowing staying quiet and contributing your ideas at work and in groups.",
+          "sensitive": false,
+          "file": "csv/speaking-up.csv",
+          "lines": 92,
+          "firstLine": "Staying quiet in meetings can feel safe, yet it often leaves your best thinking unheard. Across the coming ninety or so days, these notes will help you take up a little more room in the conversation."
+        },
+        {
+          "slug": "patience",
+          "title": "Growing more patient with people and progress",
+          "description": "For loosening hurry and irritability, with others, with learning and with yourself.",
+          "sensitive": false,
+          "file": "csv/patience.csv",
+          "lines": 92,
+          "firstLine": "Wanting things to happen faster is very human, and it can make ordinary days feel tense. For the next ninety days or so, these notes offer small ways to loosen that hurry and find a calmer pace."
+        }
+      ]
     }
   ]
 }
