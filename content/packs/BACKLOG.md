@@ -80,3 +80,13 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - new-language-of-feelings: Naming your feelings
 - volunteer-self: Becoming someone who gives time to their community
 - patience: Growing more patient with people and progress
+
+## Added by run 7 (unused ideas)
+- decisive: Becoming someone who makes decisions
+- honest-self: Saying what you really think, kindly
+- financial-generosity: Becoming someone who gives (not financial advice)
+- curiosity-people: Getting curious about other people
+- home-as-haven: Making your home feel like yours
+- slower-mornings-phone-free: Starting the day without your phone
+- after-a-move-abroad: Finding yourself in another culture
+- quitting-busy-pride: Outgrowing the need to look busy
