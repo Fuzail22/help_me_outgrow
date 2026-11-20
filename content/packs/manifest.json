@@ -473,6 +473,65 @@
           "firstLine": "Welcome. If you often swallow your real opinion or reach for a small white lie to keep the peace, these notes are for you. For about ninety days, one line a day will help you say what you think, kindly."
         }
       ]
+    },
+    {
+      "date": "2026-11-20-run9",
+      "topics": [
+        {
+          "slug": "conflict-calm",
+          "title": "Handling disagreement calmly",
+          "description": "For outgrowing avoiding conflict or exploding, and learning to disagree steadily and kindly.",
+          "sensitive": false,
+          "file": "csv/conflict-calm.csv",
+          "lines": 92,
+          "firstLine": "Disagreement does not have to mean drama or silence. Over roughly ninety days you will get one short note a day to help you stay steady, speak plainly and stay kind when you and someone else see things differently."
+        },
+        {
+          "slug": "feedback-taker",
+          "title": "Hearing feedback without crumbling",
+          "description": "For outgrowing defensiveness and hurt around criticism, and using feedback to grow.",
+          "sensitive": false,
+          "file": "csv/feedback-taker.csv",
+          "lines": 92,
+          "firstLine": "Feedback can sting, even when it is fair. For about ninety days you will receive one short note a day to help you hear comments without crumbling, and to turn them into something useful."
+        },
+        {
+          "slug": "tidy-mind-journaling",
+          "title": "Becoming someone who journals",
+          "description": "For building a simple, lasting habit of writing things down to think more clearly.",
+          "sensitive": false,
+          "file": "csv/tidy-mind-journaling.csv",
+          "lines": 92,
+          "firstLine": "Welcome. Over roughly ninety days you will get one short note a day about becoming someone who writes things down, not for an audience, just to think a little more clearly."
+        },
+        {
+          "slug": "nature-connection",
+          "title": "Becoming someone who spends time outdoors",
+          "description": "For outgrowing an indoor, screen-bound life and making time outside part of who you are.",
+          "sensitive": false,
+          "file": "csv/nature-connection.csv",
+          "lines": 92,
+          "firstLine": "Hello. For about ninety days you will get one short note a day about becoming someone who spends time outdoors, wherever you live, a little at a time."
+        },
+        {
+          "slug": "hobby-finisher",
+          "title": "Becoming someone who finishes what they start",
+          "description": "For outgrowing a trail of half-done hobbies and projects, and enjoying the satisfaction of completing things.",
+          "sensitive": false,
+          "file": "csv/hobby-finisher.csv",
+          "lines": 92,
+          "firstLine": "Welcome. For roughly ninety days you will get one short note a day about finishing what you start, and about learning to enjoy the quiet satisfaction of a thing properly done."
+        },
+        {
+          "slug": "small-talk",
+          "title": "Becoming comfortable with small talk",
+          "description": "For outgrowing awkwardness with casual conversation and enjoying light connection with people.",
+          "sensitive": false,
+          "file": "csv/small-talk.csv",
+          "lines": 92,
+          "firstLine": "Welcome. Over about ninety days you will get one short note a day to help small talk feel lighter, easier, and perhaps even enjoyable."
+        }
+      ]
     }
   ]
 }
