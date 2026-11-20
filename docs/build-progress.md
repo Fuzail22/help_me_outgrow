@@ -24,7 +24,7 @@ delete-all for the user only; carry on without stopping unless the owner objects
 | G6 enough quotes, ending notice, next page | HMO | done (with G0) | Onboarding warns before sign-in (`/api/public/config`), server checks again; `/next/:id` loop / extend / new course (validated before the old course is stopped). |
 | G5 payments (Razorpay, Stripe, mock) | HMO | done | Server-priced orders; Razorpay checkout signature + webhook, Stripe Checkout + signed webhook (5 min tolerance); atomic fulfil (one grant per order); buyer number per product family → term; VAVP1 n-th unit pricing; waitlist when international is off; renewal banner (3 days). No live keys: owner creates accounts. api 46 tests, e2e upgrade 1. |
 | G7 journal | HMO | done | AES-256-GCM per person (HKDF of JOURNAL_KEY + user id, AAD = user id); export JSON/Markdown and typed delete-all for the user only; admin sees counts/dates; reminders: own times = looping enrolment on the shared private `journal-prompts` topic (Write now / Later snooze), or tie = "Journal on this" button on a quote topic (no extra notification). Fixed: `$set` with `_id` failed on a second settings save. api 52, e2e journal 1. |
-| G8/G9 content check, TWA, legal pages | HMO | todo | |
+| G8/G9 content check, TWA, legal pages | HMO | done | Content check (G4); platform gap/cap/tag/title (P5); Android install card; `android/` Trusted Web Activity manifest + owner steps; pricing (live from settings), refunds, terms, contact pages (drafts to review). |
 
 ## Log
 - 2026-11-20: design written and pushed for review.
@@ -34,3 +34,4 @@ delete-all for the user only; carry on without stopping unless the owner objects
 - 2026-11-20: G2–G4 built (with the G8 content check). Next: G5 payments.
 - 2026-11-20: G5 built. Renewal reminder is an in-app banner on My notes (not inside notifications). Next: G7 journal.
 - 2026-11-20: G7 built. Next: G8/G9 (TWA, legal pages), then full regression and docs.
+- 2026-11-20: G8/G9 built. Full regression green: NS server 155, SDK 13, console e2e 20; HMO api 52, e2e 27. All steps done. Remaining are owner inputs (keys, accounts, Play listing, legal review) — see README "Going live".

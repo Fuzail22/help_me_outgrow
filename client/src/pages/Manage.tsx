@@ -7,6 +7,7 @@ import type { Me } from '@notification-service/sdk';
 import { api, app, auth, ns, type AppEnrolment as Enrolment, type EnrolmentPatch, type Limits } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
+import { InstallCard } from '../components/InstallCard';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
 import { describeSchedule, formatDate, formatWhen, fromSlots, todayIn, toSlots } from '../lib/time';
 
@@ -143,6 +144,7 @@ export function Manage() {
       <h1>My notes</h1>
       <p className="muted">Signed in as {user.name}</p>
       {notice && <div className="callout" role="status">{notice}</div>}
+      {live.length > 0 && <InstallCard />}
       {ending > 0 && <div className="callout" role="status">{ending === 1 ? 'A paid privilege ends' : `${ending} paid privileges end`} in under 3 days. <Link to="/upgrade">Renew</Link> or keep growing on <Link to="/growth">Grow with us</Link>.</div>}
       {error && <div className="callout warn" role="alert">{error}</div>}
 

@@ -62,6 +62,11 @@ async function own(ctx: Ctx, user: User, id: string) {
 }
 
 export function enrolmentRoutes(ctx: Ctx, api: Router) {
+  /** The public pricing page (also needed by the payment providers' site review). Rupees; terms by buyer number. */
+  api.get('/api/public/pricing', h(async (_req, res) => {
+    const p = await getSettings(ctx, 'pricing');
+    res.json({ vavp1Units: p.vavp1Units, vavp1Bundle3: p.vavp1Bundle3, vavp2: p.vavp2, vavp3: p.vavp3, terms: p.terms, international: p.international, usd: p.usd, supportEmail: ctx.config.supportEmail });
+  }));
   /** Before sign-in: the starting allowance, so onboarding can warn early (the server checks again). */
   api.get('/api/public/config', h(async (_req, res) => {
     const lim = await getSettings(ctx, 'limits');

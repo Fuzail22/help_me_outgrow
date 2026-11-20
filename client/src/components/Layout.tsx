@@ -28,7 +28,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <main>{children}</main>
       <footer>
         <CareNote />
-        <p className="muted"><Link to="/privacy">Privacy</Link></p>
+        <p className="muted footer-links"><Link to="/privacy">Privacy</Link> <Link to="/terms">Terms</Link> <Link to="/pricing">Pricing</Link> <Link to="/refunds">Refunds</Link> <Link to="/contact">Contact</Link></p>
       </footer>
     </div>
   );

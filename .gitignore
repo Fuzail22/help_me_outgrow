@@ -8,3 +8,7 @@ test-results
 client/public/sw-core.js
 e2e/demo-output
 *.tsbuildinfo
+
+# Android signing key (Trusted Web Activity): never commit
+android/*.keystore
+android/app-release*
