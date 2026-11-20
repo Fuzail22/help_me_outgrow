@@ -90,3 +90,13 @@ Add ideas freely; mark nothing here by hand: `manifest.json` is the source of tr
 - slower-mornings-phone-free: Starting the day without your phone
 - after-a-move-abroad: Finding yourself in another culture
 - quitting-busy-pride: Outgrowing the need to look busy
+
+## Added by run 8 (unused ideas)
+- hobby-finisher: Becoming someone who finishes what they start (hobbies and projects)
+- kinder-inner-voice-parent: Parenting without shouting (not parenting advice)
+- money-talks: Talking openly about money with a partner (not financial advice)
+- feedback-taker: Hearing feedback without crumbling
+- rest-without-guilt: Taking a real day off
+- new-team-member: Settling into a new job
+- after-friendship-ends: Moving on when a friendship ends
+- small-talk: Becoming comfortable with small talk
