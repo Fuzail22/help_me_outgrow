@@ -591,6 +591,65 @@
           "firstLine": "Welcome. Over about ninety days you will get one short note a day to help you make room for fun, silliness and play again."
         }
       ]
+    },
+    {
+      "date": "2026-11-20-run11",
+      "topics": [
+        {
+          "slug": "self-trust",
+          "title": "Trusting your own judgement again",
+          "description": "For outgrowing second-guessing and reliance on others' approval, and learning to trust your own judgement again.",
+          "sensitive": false,
+          "file": "csv/self-trust.csv",
+          "lines": 92,
+          "firstLine": "Welcome. Across roughly ninety days you will receive one brief note each day to help you listen to your own judgement again and act on it with growing confidence."
+        },
+        {
+          "slug": "clutter-free",
+          "title": "Letting go of things you no longer need",
+          "description": "For outgrowing a cluttered home and the habit of keeping things \"just in case\", one small decision at a time.",
+          "sensitive": false,
+          "file": "csv/clutter-free.csv",
+          "lines": 92,
+          "firstLine": "Welcome. During the next ninety or so days you will get one short daily note to help you let go of things you no longer need and enjoy a lighter home."
+        },
+        {
+          "slug": "reliable-friend",
+          "title": "Becoming someone who shows up for friends",
+          "description": "For outgrowing flakiness and drifting contact, and becoming a friend people can count on.",
+          "sensitive": false,
+          "file": "csv/reliable-friend.csv",
+          "lines": 92,
+          "firstLine": "Welcome. Over about ninety days you will get one short note a day to help you become the kind of friend people can count on, in small, steady ways."
+        },
+        {
+          "slug": "open-minded",
+          "title": "Changing your mind gracefully",
+          "description": "For outgrowing the need to be right, and learning to hold views lightly and update them without shame.",
+          "sensitive": false,
+          "file": "csv/open-minded.csv",
+          "lines": 92,
+          "firstLine": "Welcome. For roughly ninety days you will receive one short note a day to help you hold your views a little more lightly and change your mind with grace."
+        },
+        {
+          "slug": "rest-without-guilt",
+          "title": "Taking a real day off",
+          "description": "For outgrowing guilt about resting, and learning to take proper days off without earning them first.",
+          "sensitive": false,
+          "file": "csv/rest-without-guilt.csv",
+          "lines": 92,
+          "firstLine": "Welcome. Across roughly ninety days you will receive one short note a day to help you take real days off, and to rest without needing to earn it first."
+        },
+        {
+          "slug": "local-roots",
+          "title": "Becoming part of your neighbourhood",
+          "description": "For outgrowing anonymity where you live and slowly becoming a familiar, connected neighbour.",
+          "sensitive": false,
+          "file": "csv/local-roots.csv",
+          "lines": 92,
+          "firstLine": "Welcome. For the next ninety days or so, one short note a day will help you put down roots where you live and slowly become part of your neighbourhood."
+        }
+      ]
     }
   ]
 }
