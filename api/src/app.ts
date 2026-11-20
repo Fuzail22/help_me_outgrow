@@ -6,6 +6,8 @@ import { PlatformError } from './platform.js';
 import { authRoutes } from './routes/auth.js';
 import { enrolmentRoutes } from './routes/enrolments.js';
 import { adminRoutes } from './admin/routes.js';
+import { growthRoutes, proofAdminRoutes } from './routes/growth.js';
+import { ownTopicRoutes, topicAdminRoutes } from './routes/topics.js';
 
 export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => void } = {}) {
   const { config } = ctx;
@@ -41,7 +43,9 @@ export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => voi
   const api = express.Router();
   authRoutes(ctx, api);
   enrolmentRoutes(ctx, api);
-  adminRoutes(ctx, api);
+  growthRoutes(ctx, api);
+  ownTopicRoutes(ctx, api);
+  adminRoutes(ctx, api, [proofAdminRoutes(ctx), topicAdminRoutes(ctx)]);
   opts.extra?.(api);
   app.use(api);
 

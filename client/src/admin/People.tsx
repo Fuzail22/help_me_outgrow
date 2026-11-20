@@ -64,7 +64,7 @@ function Person({ me }: { me: AdminMe }) {
       {can(me, 'owner') && (
         <form className="inline-form" onSubmit={(ev) => { ev.preventDefault(); void act(() => admin('POST', `/users/${d.user.id}/entitlements`, { kind: form.kind, topicId: form.topicId || null, amount: Number(form.amount), months: form.months ? Number(form.months) : null, note: form.note })); }}>
           <strong>Grant by hand</strong>
-          <label className="field">What<select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}><option value="slots">Extra notifications a day</option><option value="items">Extra quotes</option></select></label>
+          <label className="field">What<select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}><option value="slots">Extra notifications a day</option><option value="items">Extra quotes</option><option value="own_topic">Own topic (VAVP3; leave topic empty)</option></select></label>
           <label className="field">Topic id<input value={form.topicId} onChange={(e) => setForm({ ...form, topicId: e.target.value })} /></label>
           <label className="field">Amount<input type="number" min={1} value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })} /></label>
           <label className="field">Months (empty: no end)<input type="number" min={1} value={form.months} onChange={(e) => setForm({ ...form, months: e.target.value })} /></label>

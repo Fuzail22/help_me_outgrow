@@ -50,8 +50,10 @@ export async function limitsFor(ctx: Ctx, user: User, topics: PlatformTopic[]) {
 
 /** Topics this person may follow: listed public topics, plus their own (VAVP3). The platform does not check this; we do. */
 export async function topicsFor(ctx: Ctx, user: User) {
-  const [all, own] = await Promise.all([ctx.platform.topics(), ctx.store.ownTopics.find({ userId: user._id })]);
-  const mine = new Set(own.filter((o) => o.status !== 'rejected').map((o) => o.platformTopicId));
+  const [all, own, ents] = await Promise.all([ctx.platform.topics(), ctx.store.ownTopics.find({ userId: user._id }), activeEntitlements(ctx, user._id, 'own_topic')]);
+  // Their own topics while the privilege lasts (a public one is usable by them while it waits for review).
+  const live = new Set(ents.map((e) => e._id));
+  const mine = new Set(own.filter((o) => o.status !== 'rejected' && live.has(o.entitlementId)).map((o) => o.platformTopicId));
   return all.filter((t) => t.status === 'active' && t.slug !== JOURNAL_TOPIC_SLUG && (mine.has(t._id) || (t.visibility === 'public' && !t.retiredAt)));
 }
 export const JOURNAL_TOPIC_SLUG = 'journal-prompts';

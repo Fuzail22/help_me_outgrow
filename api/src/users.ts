@@ -39,7 +39,9 @@ export async function signInUser(ctx: Ctx, input: SignInInput): Promise<{ user: 
     user = await normaliseUser(ctx, user);
     user = (await ctx.store.users.findOneAndUpdate({ _id: user._id }, { $set: { [`providers.${input.provider}`]: input.sub, email, name: input.name } }))!;
   } else {
-    const owner = input.ref ? await ctx.store.users.findOne({ referralCode: input.ref }) : null;
+    const found = input.ref ? await ctx.store.users.findOne({ referralCode: input.ref }) : null;
+    // Signing up again on a device the referrer uses is not a referral.
+    const owner = found && !(input.deviceId && (found.deviceIds ?? []).includes(input.deviceId)) ? found : null;
     for (let i = 0; !user; i++) {
       const doc: User = {
         _id: newId('u_'), email, name: input.name, createdAt: ctx.now(), providers: { [input.provider]: input.sub }, deviceIds: [],
@@ -55,6 +57,8 @@ export async function signInUser(ctx: Ctx, input: SignInInput): Promise<{ user: 
   }
   if (input.deviceId && !user.deviceIds.includes(input.deviceId)) {
     user = (await ctx.store.users.findOneAndUpdate({ _id: user._id }, { $addToSet: { deviceIds: input.deviceId } }))!;
+    // A visit to their own link from this device (before they signed in on it) was not someone else's.
+    await ctx.store.refVisits.deleteMany({ ownerId: user._id, deviceId: input.deviceId });
   }
   return { user, created };
 }

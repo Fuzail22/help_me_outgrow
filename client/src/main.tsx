@@ -11,6 +11,8 @@ import { Quote } from './pages/Quote';
 import { Privacy } from './pages/Privacy';
 import { Next } from './pages/Next';
 import { SignInPage } from './pages/SignInPage';
+import { Growth, Referral } from './pages/Growth';
+import { OwnTopic } from './pages/OwnTopic';
 
 // The admin is loaded only when someone opens it.
 const Admin = lazy(() => import('./admin/Admin'));
@@ -37,6 +39,9 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/next/:id" element={<Next />} />
             <Route path="/signin" element={<SignInPage />} />
+            <Route path="/growth" element={<Growth />} />
+            <Route path="/r/:code" element={<Referral />} />
+            <Route path="/my-topic" element={<OwnTopic />} />
             <Route path="/admin/*" element={<Suspense fallback={<p className="muted">Loading…</p>}><Admin /></Suspense>} />
             <Route path="*" element={<Landing />} />
           </Routes>

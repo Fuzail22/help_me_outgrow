@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { HELPLINE_URL } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { Reconnect } from './Reconnect';
+import { Celebrate } from './Celebrate';
 
 export function CareNote() {
   return (
@@ -20,9 +21,10 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className={'shell' + (wide ? ' wide' : '')}>
       <header className="top">
         <Link to="/" className="brand"><img src="/icons/icon.svg" alt="" width="28" height="28" /> help me outgrow</Link>
-        <nav>{user ? <Link to="/manage">My notes</Link> : <Link to="/manage">Sign in</Link>}</nav>
+        <nav className="topnav">{user ? <><Link to="/manage">My notes</Link><Link to="/growth">Grow</Link></> : <Link to="/manage">Sign in</Link>}</nav>
       </header>
       <Reconnect />
+      <Celebrate />
       <main>{children}</main>
       <footer>
         <CareNote />

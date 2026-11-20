@@ -35,11 +35,15 @@ export function Onboard() {
   const [interest, setInterest] = useState(false);
   const [pub, setPub] = useState<PublicConfig | null>(null);
   const [short, setShort] = useState<NotEnoughInfo | null>(null);
+  // Signed in: the topics this person may follow (their own VAVP3 topics included), from our api.
+  const [mine, setMine] = useState<Config['topics'] | null>(null);
+  useEffect(() => { if (user) app.limits().then((l) => setMine(l.topics.map((t) => ({ id: t.id, slug: t.slug, title: t.title, description: t.description, itemCount: t.itemCount, sensitive: t.sensitive })))).catch(() => undefined); }, [user]);
 
   useEffect(() => { ns.getConfig().then(setConfig).catch(() => setLoadError(true)); app.publicConfig().then(setPub).catch(() => undefined); void ns.track('onboard_start'); }, []);
   useEffect(() => { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); }, [draft]);
 
-  const topic = useMemo(() => config?.topics.find((t) => t.id === draft.topicId) ?? null, [config, draft.topicId]);
+  const topicList = mine ?? config?.topics ?? [];
+  const topic = useMemo(() => topicList.find((t) => t.id === draft.topicId) ?? null, [topicList, draft.topicId]);
   const slots = toSlots(draft.days, draft.times);
   // An end date chosen to fit a short topic wins over the duration chips.
   const endDate = draft.endDate ?? endDateFor(draft.timezone, draft.durationDays);
@@ -106,7 +110,7 @@ export function Onboard() {
         <>
           <h1>What are you going through?</h1>
           <div className="cards">
-            {config.topics.map((t) => (
+            {topicList.map((t) => (
               <button key={t.id} className={'card' + (draft.topicId === t.id ? ' on' : '')} aria-pressed={draft.topicId === t.id}
                 onClick={() => { setDraft({ ...draft, topicId: t.id }); void ns.track('topic_picked', { topic: t.slug }); setStep('times'); }}>
                 <strong>{t.title}</strong><span>{t.description}</span>
