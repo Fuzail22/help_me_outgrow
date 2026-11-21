@@ -110,6 +110,28 @@ describe('G5: Razorpay', () => {
   });
 });
 
+describe('G5: Razorpay outside India', () => {
+  it('with international payments on, a visitor abroad pays in USD through Razorpay; the signed result grants as usual', async () => {
+    const s = await setup();
+    const created: any[] = [];
+    const fakeFetch = (async (url: string, init: any) => { created.push({ url, body: JSON.parse(init.body) }); return { ok: true, status: 200, json: async () => ({ id: 'order_rzp_usd' }) }; }) as any;
+    s.ctx.payments = createPayments({ razorpay: { keyId: 'rzp_test_key', keySecret: KEY_SECRET, webhookSecret: RZP_WH, fetch: fakeFetch }, razorpayInternational: true });
+    const a = await s.signIn('Ana'); const c = s.as(a.cookie);
+    expect((await c.get('/api/upgrade/catalog?tz=America/New_York').expect(200)).body).toMatchObject({ provider: 'razorpay', currency: 'USD' });
+    const o = (await c.post('/api/upgrade/orders', { product: 'vavp3_private', tz: 'America/New_York' }).expect(201)).body;
+    expect(o).toMatchObject({ provider: 'razorpay', currency: 'USD', amountMinor: 499 });
+    expect(created[0].body).toMatchObject({ amount: 499, currency: 'USD' });
+    await c.post(`/api/upgrade/orders/${o.orderId}/verify`, { razorpay_order_id: 'order_rzp_usd', razorpay_payment_id: 'pay_u', razorpay_signature: hmac(KEY_SECRET, 'order_rzp_usd|pay_u') }).expect(200);
+    expect(await s.ctx.store.entitlements.findOne({ userId: a.id })).toMatchObject({ kind: 'own_topic' });
+  });
+  it('without it (and without Stripe), visitors abroad get the waitlist', async () => {
+    const s = await setup();
+    s.ctx.payments = createPayments({ razorpay: { keyId: 'k', keySecret: KEY_SECRET, webhookSecret: null } });
+    const a = await s.signIn('Ana');
+    expect((await s.as(a.cookie).get('/api/upgrade/catalog?tz=America/New_York').expect(200)).body).toMatchObject({ available: false, waitlist: true });
+  });
+});
+
 describe('G5: Stripe and the mock', () => {
   it('Stripe Checkout: redirect URL from the session; the signed webhook grants; a stale or forged one is refused', async () => {
     const { s, created } = await shop();

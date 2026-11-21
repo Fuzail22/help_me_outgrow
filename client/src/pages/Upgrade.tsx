@@ -85,7 +85,7 @@ export function Upgrade() {
               </div>
             ))}
           </div>
-          <p className="muted small">How long it lasts depends on how early you are: the first 10 buyers of each get a year, the next 10 six months, the next 50 three months, then one month. {cat.provider === 'razorpay' ? 'Pay by UPI, card, netbanking or wallet (Razorpay).' : cat.provider === 'stripe' ? 'Pay by card (Stripe), in US dollars.' : 'Test payments (no real money).'} See <Link to="/pricing">pricing</Link> and <Link to="/refunds">refunds</Link>.</p>
+          <p className="muted small">How long it lasts depends on how early you are: the first 10 buyers of each get a year, the next 10 six months, the next 50 three months, then one month. {cat.provider === 'razorpay' ? (c === 'INR' ? 'Pay by UPI, card, netbanking or wallet (Razorpay).' : 'Pay by card in US dollars (Razorpay).') : cat.provider === 'stripe' ? 'Pay by card (Stripe), in US dollars.' : 'Test payments (no real money).'} See <Link to="/pricing">pricing</Link> and <Link to="/refunds">refunds</Link>.</p>
         </>
       )}
       {error && <p className="error" role="alert">{error}</p>}

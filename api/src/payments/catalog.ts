@@ -35,10 +35,11 @@ export function countryOf(headers: Record<string, string | string[] | undefined>
 
 /** Which provider and currency serve this country, or null (international sales off: waitlist). */
 export function channelFor(ctx: Ctx, pricing: PricingSettings, country: string): { provider: Provider; currency: 'INR' | 'USD' } | null {
-  const { razorpay, stripe, mock } = ctx.payments;
+  const { razorpay, stripe, mock, razorpayInternational } = ctx.payments;
   if (country === 'IN') { const p = razorpay ?? mock; return p ? { provider: p, currency: 'INR' } : null; }
   if (!pricing.international) return null;
-  const p = stripe ?? mock;
+  // Outside India: Razorpay's international cards in USD (no Stripe needed), else Stripe if configured.
+  const p = (razorpayInternational ? razorpay : null) ?? stripe ?? mock;
   return p ? { provider: p, currency: 'USD' } : null;
 }
 

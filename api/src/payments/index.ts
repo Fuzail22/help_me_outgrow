@@ -14,7 +14,12 @@ export interface Provider {
   verifyClient?(providerOrderId: string, body: Record<string, unknown>): { paymentId: string };
   parseWebhook?(raw: Buffer, headers: Record<string, string | undefined>, nowMs: number): WebhookResult | null;
 }
-export interface Payments { razorpay: Provider | null; stripe: Provider | null; mock: Provider | null; enabled: { razorpay: boolean; stripe: boolean; mock: boolean } }
+export interface Payments {
+  razorpay: Provider | null; stripe: Provider | null; mock: Provider | null;
+  /** Razorpay also takes international cards (USD) once "International payments" is activated on the account. */
+  razorpayInternational: boolean;
+  enabled: { razorpay: boolean; stripe: boolean; mock: boolean };
+}
 
 export class PaymentError extends Error { constructor(public code: string, message: string) { super(message); } }
 const hmacHex = (secret: string, data: string | Buffer) => createHmac('sha256', secret).update(data).digest('hex');
@@ -89,8 +94,8 @@ export function mock(appOrigin: string): Provider {
   return { name: 'mock', async createOrder(i) { return { providerOrderId: `mock_${i.orderId}`, checkout: { url: `${appOrigin}/upgrade/mock/${i.orderId}` } }; } };
 }
 
-export function createPayments(o: { razorpay?: Parameters<typeof razorpay>[0] | null; stripe?: Parameters<typeof stripe>[0] | null; mockOrigin?: string | null }): Payments {
+export function createPayments(o: { razorpay?: Parameters<typeof razorpay>[0] | null; stripe?: Parameters<typeof stripe>[0] | null; mockOrigin?: string | null; razorpayInternational?: boolean }): Payments {
   const r = o.razorpay ? razorpay(o.razorpay) : null; const s = o.stripe ? stripe(o.stripe) : null; const m = o.mockOrigin ? mock(o.mockOrigin) : null;
-  return { razorpay: r, stripe: s, mock: m, enabled: { razorpay: !!r, stripe: !!s, mock: !!m } };
+  return { razorpay: r, stripe: s, mock: m, razorpayInternational: !!(r && o.razorpayInternational), enabled: { razorpay: !!r, stripe: !!s, mock: !!m } };
 }
 export const noPayments: Payments = createPayments({});

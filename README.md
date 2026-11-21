@@ -2,7 +2,7 @@
 
 A short, supportive note in your browser's notifications at the times you choose. No app to install.
 Version 0.6: four curated topics, Google and Zoho sign-in, levels earned by helping the app grow (VAVP), paid
-privileges (Razorpay in India, Stripe elsewhere), a private journal, and an admin at `/admin`.
+privileges (Razorpay: UPI and cards in India, international cards in USD), a private journal, and an admin at `/admin`.
 Design: [docs/design/HLD.md](docs/design/HLD.md), [LLD.md](docs/design/LLD.md); build log: [docs/build-progress.md](docs/build-progress.md).
 iPhone (iOS 16.4+) works as a Home Screen web app; the owner's real-device checklist is [docs/iphone-test.md](docs/iphone-test.md).
 
@@ -87,7 +87,8 @@ Both deploy workflows read the same environment, so a value shared by the api an
 | `SUPPORT_EMAIL` | variable | api | defaults to support@htsta.com |
 | `ZOHO_CLIENT_ID` / `ZOHO_CLIENT_SECRET` / `ZOHO_ACCOUNTS_URL` | variable / secret / variable | api | optional Zoho sign-in; redirect URI `API_URL/auth/zoho/callback` |
 | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` | variable / secret / secret | api | India payments |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | secret / secret | api | payments outside India |
+| `RAZORPAY_INTERNATIONAL` | variable | api | `1` once Razorpay's International payments is activated: visitors abroad pay in USD through Razorpay |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | secret / secret | api | optional; only if Stripe ever becomes available to you |
 
 ## Content
 

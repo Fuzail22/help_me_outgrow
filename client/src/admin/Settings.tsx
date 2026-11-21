@@ -152,7 +152,7 @@ function PricingForm({ canEdit }: { canEdit: boolean }) {
   return (
     <div className="settings">
       <Saved s={s} />
-      <p className="muted">Paid privileges are sold on their own page, separate from what people earn by levels. Prices are in rupees for India (Razorpay: UPI, cards, netbanking, wallets) and in US dollars elsewhere (Stripe). How long a purchase lasts depends on how early the person bought that product.</p>
+      <p className="muted">Paid privileges are sold on their own page, separate from what people earn by levels. Prices are in rupees for India (Razorpay: UPI, cards, netbanking, wallets) and in US dollars elsewhere (Razorpay international cards, or Stripe if configured). How long a purchase lasts depends on how early the person bought that product.</p>
       <h3>How long a purchase lasts (by buyer number, per product)</h3>
       {d.terms.map((t, i) => (
         <div className="inline-form" key={i}>
@@ -186,7 +186,7 @@ function PricingForm({ canEdit }: { canEdit: boolean }) {
         {ranks.map((r) => <tr key={r}><td>{r}</td><td>{termFor(d.terms, r)} months</td><td>{rupees(ladderPrice(d.vavp3.private, r))}</td><td>{rupees(ladderPrice(d.vavp3.public, r))}</td></tr>)}
       </tbody></table>
       <h3>Outside India</h3>
-      <label className="check"><input type="checkbox" checked={d.international} onChange={(e) => set({ international: e.target.checked })} /><span>Sell outside India (Stripe, US dollars). When off, visitors from other countries can join a waitlist.</span></label>
+      <label className="check"><input type="checkbox" checked={d.international} onChange={(e) => set({ international: e.target.checked })} /><span>Sell outside India (US dollars, through Razorpay's international payments). When off, visitors from other countries can join a waitlist.</span></label>
       <Money usd label="VAVP1, one extra notification" value={d.usd.vavp1Unit} onChange={(n) => set({ usd: { ...d.usd, vavp1Unit: n } })} />
       <Money usd label="VAVP1, bundle of 3" value={d.usd.vavp1Bundle3} onChange={(n) => set({ usd: { ...d.usd, vavp1Bundle3: n } })} />
       {d.vavp2.map((p, i) => <Money usd key={i} label={`VAVP2, ${p.items} quotes`} value={d.usd.vavp2[i] ?? 0} onChange={(n) => { const v = [...d.usd.vavp2]; v[i] = n; set({ usd: { ...d.usd, vavp2: v } }); }} />)}

@@ -34,6 +34,8 @@ const env = z.object({
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
   RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+  /** 1 once "International payments" is activated on the Razorpay account: visitors outside India pay in USD there. */
+  RAZORPAY_INTERNATIONAL: z.enum(['0', '1']).optional(),
   /** Stripe Checkout (outside India). Test keys start sk_test_. */
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
@@ -56,6 +58,7 @@ const ctx = {
     razorpay: env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET ? { keyId: env.RAZORPAY_KEY_ID, keySecret: env.RAZORPAY_KEY_SECRET, webhookSecret: env.RAZORPAY_WEBHOOK_SECRET ?? null } : null,
     stripe: env.STRIPE_SECRET_KEY ? { secretKey: env.STRIPE_SECRET_KEY, webhookSecret: env.STRIPE_WEBHOOK_SECRET ?? null } : null,
     mockOrigin: env.PAYMENTS_MOCK === '1' ? env.APP_ORIGIN : null,
+    razorpayInternational: env.RAZORPAY_INTERNATIONAL === '1',
   }),
   config: {
     sessionSecret: env.SESSION_SECRET, appOrigin: env.APP_ORIGIN, devLogin, secureCookies: env.APP_ORIGIN.startsWith('https://'),

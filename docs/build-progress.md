@@ -35,3 +35,4 @@ delete-all for the user only; carry on without stopping unless the owner objects
 - 2026-11-20: G5 built. Renewal reminder is an in-app banner on My notes (not inside notifications). Next: G7 journal.
 - 2026-11-20: G7 built. Next: G8/G9 (TWA, legal pages), then full regression and docs.
 - 2026-11-20: G8/G9 built. Full regression green: NS server 155, SDK 13, console e2e 20; HMO api 52, e2e 27. All steps done. Remaining are owner inputs (keys, accounts, Play listing, legal review) — see README "Going live".
+- 2026-11-21: owner created the Razorpay account. Stripe does not offer India at sign-up (invite only), so international payments go through Razorpay in USD (`RAZORPAY_INTERNATIONAL=1` after Razorpay activates International payments). Stripe code kept, unused. api 54.

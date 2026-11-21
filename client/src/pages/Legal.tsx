@@ -37,7 +37,7 @@ export function Pricing() {
           {p.international && <><h2>Outside India</h2><p>Prices in US dollars: one more notification a day {d(p.usd.vavp1Unit)} (three for {d(p.usd.vavp1Bundle3)}), more notes from {d(p.usd.vavp2[0] ?? 99)}, your own topic {d(p.usd.vavp3Private)} (private) or {d(p.usd.vavp3Public)} (public).</p></>}
         </>
       )}
-      <p>Payments in India are handled by Razorpay (UPI, cards, netbanking, wallets); elsewhere by Stripe (cards). We never see your card or UPI details. See <Link to="/refunds">refunds</Link> and <Link to="/terms">terms</Link>.</p>
+      <p>Payments are handled by Razorpay: UPI, cards, netbanking and wallets in India, and international cards in US dollars elsewhere. We never see your card or UPI details. See <Link to="/refunds">refunds</Link> and <Link to="/terms">terms</Link>.</p>
     </section>
   );
 }
@@ -51,7 +51,7 @@ export function Refunds() {
         <li>If a payment went through but nothing was unlocked, write to <a href={`mailto:${SUPPORT}`}>{SUPPORT}</a> with the date and amount. We will unlock it or refund it in full.</li>
         <li>You can ask for a full refund within 7 days of a purchase, for any reason, by writing to {SUPPORT} from the email you sign in with.</li>
         <li>After 7 days, purchases are not refundable, but you can stop using them at any time.</li>
-        <li>Refunds go back to the original payment method. Razorpay and Stripe usually take 5 to 7 working days.</li>
+        <li>Refunds go back to the original payment method. Razorpay usually takes 5 to 7 working days.</li>
         <li>If we close the service, unused time on a purchase is refunded in proportion.</li>
       </ul>
     </section>
