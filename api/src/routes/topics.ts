@@ -11,6 +11,7 @@ import { audit, type AdminRequest } from '../admin/auth.js';
 import express from 'express';
 import { apply, plan, readZip } from '../importer.js';
 import type { AdminRole, OwnTopic, User } from '../store/schema.js';
+import { audienceViews } from './groups.js';
 
 const lineBody = z.object({ body: z.string().trim().min(1).max(300), attribution: z.string().trim().max(120).nullish() });
 const withWarnings = <T extends { body: string }>(l: T) => ({ ...l, warnings: checkText(l.body) });
@@ -76,7 +77,8 @@ export function topicAdminRoutes(ctx: Ctx) {
     api.get(`${A}/topics`, need('editor'), h(async (_req, res) => {
       const [topics, own] = await Promise.all([ctx.platform.topics(), ctx.store.ownTopics.find({})]);
       const owned = new Map(own.map((o) => [o.platformTopicId, o]));
-      res.json({ topics: topics.map((t) => ({ ...t, own: owned.get(t._id) ? { userId: owned.get(t._id)!.userId, status: owned.get(t._id)!.status, visibility: owned.get(t._id)!.visibility } : null, system: t.slug === JOURNAL_TOPIC_SLUG })) });
+      const audience = await audienceViews(ctx, topics.map((t) => t._id));
+      res.json({ topics: topics.map((t) => ({ ...t, audience: audience(t._id), own: owned.get(t._id) ? { userId: owned.get(t._id)!.userId, status: owned.get(t._id)!.status, visibility: owned.get(t._id)!.visibility } : null, system: t.slug === JOURNAL_TOPIC_SLUG })) });
     }));
     api.post(`${A}/topics`, need('editor'), h(async (req, res) => {
       const b = parse(z.object({ slug: z.string().regex(/^[a-z0-9-]{2,40}$/), title: z.string().trim().min(1).max(60), description: z.string().trim().max(300).default(''), sensitive: z.boolean().default(false), repeat: z.boolean().default(false), visibility: z.enum(['public', 'private']).default('private') }), req.body);

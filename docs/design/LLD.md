@@ -203,3 +203,47 @@ public → private is not). Files with errors are skipped whole; the rest import
 
 **Platform**: the content API accepts `clickUrl` on append and edit (https only; `{deliveryId}` and `{token}` may be
 used), so a note's link survives the import.
+
+## G11. Groups and topic audiences (admin → Groups, admin → Topics → a topic)
+
+**Rule**: each curated topic has one audience. **Everyone** (the default; every existing topic) or **restricted**
+to chosen groups and/or chosen people. A restricted topic is hidden entirely from everyone else: it is left out of
+`/api/me/limits`, onboarding, the next-step picker, level picks and the upgrade catalogue, and starting a course on
+it answers 404 like an unknown topic. Narrowing a public topic makes it no longer public in this app; switching back
+to Everyone restores it. This app decides and enforces it (`topicsFor` in `limits.ts`); the platform's `visibility`
+keeps its meaning (private = not ready, shown to nobody) and is never changed by an audience. So a private topic set
+for a group stays hidden until an editor makes it public, and an audience can be set before that so the topic never
+reaches everyone. The journal and people's own topics (VAVP3) keep their own rules and take no audience (409
+`not_curated`).
+
+**Losing access** (removed from a group, group deleted, audience narrowed) stops new courses only. Running courses are
+not touched on the platform: they still list, pause, resume, change times and end date, and finish. Loop again,
+extend and new course on that topic are refused (they start or grow a course), and the refusal leaves the running
+course as it was.
+
+**Data** (this app's store):
+```
+Group          { _id 'grp_…'; name; nameKey (lower-case, unique); description; createdAt; createdBy; updatedAt }
+GroupMember    { _id '<groupId>:<userId>'; groupId; userId; addedAt; addedBy }    index groupId, userId
+TopicAudience  { _id <platform topic id>; mode 'restricted'; groupIds[]; userIds[]; updatedAt; updatedBy }
+               no document = Everyone; index groupIds, userIds
+```
+Deleting a group removes its memberships and pulls it from every audience (those topics stay restricted, possibly to
+nobody). Deleting an account removes its memberships and pulls it from every audience.
+
+**API** (editor and up; writes need `x-admin: 1`; every change audited):
+
+| Route | |
+| --- | --- |
+| `GET /api/admin/groups` | `{ groups: [{ _id, name, description, memberCount, … }] }` |
+| `POST /api/admin/groups { name, description? }` | 201; 409 `group_exists` (names are unique, case-insensitive) — `group.create` |
+| `GET /api/admin/groups/:id` | `{ group, members: [{ id, email, name, addedAt, addedBy }], topics: [{ id, title }] }` |
+| `PATCH /api/admin/groups/:id { name?, description? }` | `group.update` |
+| `DELETE /api/admin/groups/:id` | 204 — `group.delete` |
+| `POST /api/admin/groups/:id/members { userIds }` | `{ added, already }`; 404 with `missing` for unknown people — `group.members.add` |
+| `DELETE /api/admin/groups/:id/members/:userId` | 204 — `group.members.remove` |
+| `GET /api/admin/topics/:id/audience` | `{ mode, groups: [{ id, name }], users: [{ id, email, name }], curated }` |
+| `PUT /api/admin/topics/:id/audience` | `{ mode: 'public' }` or `{ mode: 'restricted', groupIds, userIds }` — `topic.audience` (before/after by name) |
+
+`GET /api/admin/topics` adds `audience` to each topic; `GET /api/admin/users/:id` adds `groups`. The bulk import (G10)
+never changes an audience.

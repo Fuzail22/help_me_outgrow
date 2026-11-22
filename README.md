@@ -21,6 +21,7 @@ delivery policy (24 notifications a day per person, 15 minutes apart, 366 days a
 | Paid privileges, separate page; terms by buyer number | `/upgrade`, `api/src/payments/*` |
 | Journal (encrypted per person), reminders, export and delete | `/journal`, `api/src/journal.ts` |
 | Admin: settings with explanations, people, topics, orders, journal counts, admins, audit | `/admin` |
+| Groups of people; each topic shown to everyone or only to chosen groups and people | admin → Groups, Topics; `api/src/audience.ts` |
 | Android app wrapper to keep notes out of Chrome's spam checks | `android/README.md` |
 
 ```

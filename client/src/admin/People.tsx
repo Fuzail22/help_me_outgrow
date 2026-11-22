@@ -32,7 +32,7 @@ interface Detail {
   user: { id: string; email: string; name: string; createdAt: string; referralCode: string; referredBy: { userId: string } | null; providers: string[] };
   entitlements: Ent[]; unlocks: { level: number; at: string; pick: { vavp: string; topicId: string | null; amount: number } | null }[];
   orders: { _id: string; product: string; amountMinor: number; currency: string; status: string; termMonths: number | null; paidAt: string | null }[];
-  referrals: { visits: number; signups: number }; journalEntries: number;
+  referrals: { visits: number; signups: number }; journalEntries: number; groups?: { id: string; name: string }[];
 }
 const KIND: Record<string, string> = { slots: 'Extra notifications a day', items: 'Extra quotes', own_topic: 'Own topic' };
 
@@ -51,6 +51,7 @@ function Person({ me }: { me: AdminMe }) {
       <h1>{d.user.name}</h1>
       <p className="muted">{d.user.email} · joined {when(d.user.createdAt)} · signs in with {d.user.providers.join(', ')} · referral code <code>{d.user.referralCode}</code></p>
       <p>Referral visits: <strong>{d.referrals.visits}</strong> · sign-ups through their link: <strong>{d.referrals.signups}</strong> · journal entries: <strong>{d.journalEntries}</strong> <span className="muted small">(content is never shown here)</span></p>
+      <p>Groups: {d.groups?.length ? d.groups.map((g, i) => <span key={g.id}>{i ? ', ' : ''}{can(me, 'editor') ? <Link to={`/admin/groups/${g.id}`}>{g.name}</Link> : g.name}</span>) : <span className="muted">none</span>}</p>
       <h2>Levels</h2>
       {d.unlocks.length ? <ul>{d.unlocks.map((u) => <li key={u.level}>Level {u.level} on {when(u.at)} — {u.pick ? `picked ${u.pick.vavp.toUpperCase()} (+${u.pick.amount})` : 'pick not made yet'}</li>)}</ul> : <p className="muted">No level reached yet.</p>}
       <h2>Privileges</h2>

@@ -69,6 +69,7 @@ export async function deleteUser(ctx: Ctx, userId: string) {
   await Promise.all([
     s.journal.deleteMany({ userId }), s.journalReminders.deleteMany({ _id: userId }), s.levelUnlocks.deleteMany({ userId }),
     s.refProofs.deleteMany({ userId }), s.refVisits.deleteMany({ ownerId: userId }), s.entitlements.deleteMany({ userId }),
+    s.groupMembers.deleteMany({ userId }), s.topicAudiences.updateMany({ userIds: userId }, { $pull: { userIds: userId } }),
   ]);
   // Orders are kept (accounting), with the person removed.
   await s.orders.updateMany({ userId }, { $set: { userId: 'deleted' } });
