@@ -12,6 +12,11 @@ on:
       - ".github/workflows/ci.yml"
       - ".github/scripts/**"
   workflow_dispatch:
+    inputs:
+      allow_protected_change:
+        description: "Allow JOURNAL_KEY on Fly to differ from (or not be comparable with) the running app's. Only when no journal entries exist yet, or on purpose: a different key makes existing entries unreadable."
+        type: boolean
+        default: false
 concurrency:
   group: deploy-api
   cancel-in-progress: false
@@ -39,6 +44,7 @@ jobs:
           OPTIONAL: PUBLIC_URL ADMIN_OWNER_EMAIL SUPPORT_EMAIL ZOHO_CLIENT_ID ZOHO_CLIENT_SECRET ZOHO_ACCOUNTS_URL RAZORPAY_KEY_ID RAZORPAY_INTERNATIONAL RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET
           # Changing JOURNAL_KEY makes every journal entry unreadable.
           PROTECTED: JOURNAL_KEY
+          ALLOW_PROTECTED_CHANGE: ${{ inputs.allow_protected_change || false }}
           # Secrets
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           PLATFORM_SECRET_KEY: ${{ secrets.PLATFORM_SECRET_KEY }}
