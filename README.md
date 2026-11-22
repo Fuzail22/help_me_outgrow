@@ -54,7 +54,7 @@ New in 0.6 (in this order):
 - Set `JOURNAL_KEY` (`openssl rand -hex 32`) and never change it.
 - Set `ADMIN_OWNER_EMAIL`.
 - Optional: Zoho client, Razorpay and Stripe keys, with webhooks at `API_URL/api/payments/webhook/razorpay` and `…/stripe`.
-- Review the draft pricing, refunds and terms pages.
+- Review the pricing, refunds, terms and privacy pages (see the "Before merge" checklist in the pull request template).
 
 1. Register the permanent domain first. Subscriptions are bound to the origin and cannot be moved.
 2. Deploy notification-service; run its `bootstrap` with `--origin https://<domain>` and

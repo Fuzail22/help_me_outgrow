@@ -4,7 +4,7 @@ import { api } from '../lib/ns';
 
 /*
  * Pages payment providers ask to see before they activate an account (pricing, refunds, terms, contact).
- * DRAFTS: written for this project, not reviewed by a lawyer. The owner should review them before going live.
+ * Changes to this wording go through the "Before merge" checklist in the pull request template.
  */
 interface Ladder { start: number; step: number; band: number; maxBuyers: number }
 interface P { vavp1Units: number[]; vavp1Bundle3: number; vavp2: { items: number; price: number }[]; vavp3: { private: Ladder; public: Ladder }; terms: { upTo: number | null; months: number }[]; international: boolean; usd: { vavp1Unit: number; vavp1Bundle3: number; vavp2: number[]; vavp3Private: number; vavp3Public: number }; supportEmail: string }
@@ -14,12 +14,14 @@ const SUPPORT = 'support@htsta.com';
 
 export function Pricing() {
   const [p, setP] = useState<P | null>(null);
-  useEffect(() => { api<P>('GET', '/api/public/pricing').then(setP).catch(() => undefined); }, []);
+  const [failed, setFailed] = useState(false);
+  const load = () => { setFailed(false); api<P>('GET', '/api/public/pricing').then(setP).catch(() => setFailed(true)); };
+  useEffect(load, []);
   return (
     <section className="prose">
       <h1>Pricing</h1>
       <p>help me outgrow is free: up to three notes a day on a topic, for up to three months. You can earn more by helping the app grow (<Link to="/growth">see how</Link>), or pay for it. All prices include taxes where applicable.</p>
-      {!p ? <p className="muted">Loading…</p> : (
+      {failed ? <p role="alert">Prices could not be loaded right now. <button className="link" onClick={load}>Try again</button></p> : !p ? <p className="muted" aria-busy="true">Loading…</p> : (
         <>
           <h2>More notifications a day, on one topic</h2>
           <ul>{p.vavp1Units.map((x, i) => <li key={i}>{['First', 'Second', 'Third', 'Fourth', 'Fifth'][i] ?? `Number ${i + 1}`} extra notification: {r(x)}</li>)}<li>Three together: {r(p.vavp1Bundle3)}</li></ul>
@@ -46,7 +48,6 @@ export function Refunds() {
   return (
     <section className="prose">
       <h1>Cancellations and refunds</h1>
-      <p className="draft-flag">Draft for review before launch.</p>
       <ul>
         <li>If a payment went through but nothing was unlocked, write to <a href={`mailto:${SUPPORT}`}>{SUPPORT}</a> with the date and amount. We will unlock it or refund it in full.</li>
         <li>You can ask for a full refund within 7 days of a purchase, for any reason, by writing to {SUPPORT} from the email you sign in with.</li>
@@ -62,7 +63,6 @@ export function Terms() {
   return (
     <section className="prose">
       <h1>Terms of use</h1>
-      <p className="draft-flag">Draft for review before launch.</p>
       <ul>
         <li>help me outgrow sends short notes of encouragement at times you choose. It is not medical advice, treatment or a crisis service. If you are in danger, contact local emergency services or a helpline.</li>
         <li>You need a Google or Zoho account to sign in. Keep it secure; you are responsible for what happens under your account.</li>
