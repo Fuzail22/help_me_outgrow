@@ -1,14 +1,16 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ns } from '../lib/ns';
 import { IosGuide } from '../components/IosGuide';
 
 let counted = false;
 
 export function Landing() {
+  const [params] = useSearchParams();
   useEffect(() => { if (!counted) { counted = true; void ns.track('visit', { path: location.pathname }); } }, []);
   return (
     <section className="landing">
+      {params.get('welcome') && <p className="callout" role="status">A friend shared this with you. Welcome.</p>}
       <h1>A steady word, when you need one.</h1>
       <ul className="hooks">
         <li>Wish there had been some reassurance the day you slipped back?</li>

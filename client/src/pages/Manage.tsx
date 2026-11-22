@@ -3,27 +3,34 @@ import { IosGuide } from '../components/IosGuide';
 import { RECONNECTED, rememberDeviceStopped } from '../components/Reconnect';
 import { needsHomeScreen } from '../lib/ios';
 import { Link, useSearchParams } from 'react-router-dom';
-import type { Enrolment, Me } from '@notification-service/sdk';
-import { auth, ns } from '../lib/ns';
+import type { Me } from '@notification-service/sdk';
+import { api, app, auth, ns, type AppEnrolment as Enrolment, type EnrolmentPatch, type Limits } from '../lib/ns';
 import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
+import { InstallCard } from '../components/InstallCard';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
-import { describeSchedule, formatDate, formatWhen, fromSlots, toSlots } from '../lib/time';
+import { describeSchedule, formatDate, formatWhen, fromSlots, todayIn, toSlots } from '../lib/time';
+
+/** Days left including today; the "what's next" choice shows from 3 days before the end. */
+const daysLeft = (e: Enrolment) => Math.round((Date.parse(e.endDate + 'T00:00:00Z') - Date.parse(todayIn(e.timezone) + 'T00:00:00Z')) / 86400000) + 1;
+const notesLeft = (e: Enrolment) => (e.loop ? Infinity : Math.min(e.itemsAvailable - e.position, (e.maxItems ?? Infinity) - e.sentCount));
 
 const REASONS = [['too_many', 'Too many notes'], ['wrong_tone', 'The tone was not right'], ['feeling_better', 'I am feeling better'], ['other', 'Something else']] as const;
 type DeviceState = 'checking' | 'on' | 'off' | 'blocked' | 'unsupported';
 
+const live = (e: Enrolment) => e.status === 'active' || e.status === 'paused';
 function EnrolmentCard({ e, maxTimes, onChanged }: { e: Enrolment; maxTimes: number; onChanged: () => Promise<void> }) {
   const [mode, setMode] = useState<'view' | 'edit' | 'stop'>('view');
   const [sched, setSched] = useState(() => fromSlots(e.slots));
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const run = async (patch: Parameters<typeof ns.updateEnrolment>[1]) => {
+  const run = async (patch: EnrolmentPatch) => {
     setBusy(true); setError(null);
-    try { await ns.updateEnrolment(e.id, patch); await onChanged(); setMode('view'); } catch (err: any) { setError(err?.message ?? 'That did not work.'); } finally { setBusy(false); }
+    try { await app.updateEnrolment(e.id, patch); await onChanged(); setMode('view'); } catch (err: any) { setError(err?.message ?? 'That did not work.'); } finally { setBusy(false); }
   };
-  const live = e.status === 'active' || e.status === 'paused';
+  const ending = e.status === 'completed' || (live(e) && (daysLeft(e) <= 3 || notesLeft(e) <= 3 * Math.max(1, e.slots.length / 7)));
+  const isLive = live(e);
   return (
     <li className={'enrolment ' + e.status}>
       <div className="row">
@@ -31,8 +38,9 @@ function EnrolmentCard({ e, maxTimes, onChanged }: { e: Enrolment; maxTimes: num
         <span className={'badge ' + e.status}>{{ active: 'On', paused: 'Paused', completed: 'Finished', cancelled: 'Stopped' }[e.status]}</span>
       </div>
       <p>{describeSchedule(e.slots)} <span className="muted">· until {formatDate(e.endDate)}</span></p>
-      {e.status === 'active' && e.nextSendAt && <p className="muted small">Next note: {formatWhen(e.nextSendAt, e.timezone)} · {e.position} sent so far</p>}
-      {mode === 'view' && live && (
+      {e.status === 'active' && e.nextSendAt && <p className="muted small">Next note: {formatWhen(e.nextSendAt, e.timezone)} · {e.sentCount || e.position} sent so far{e.maxItems && !e.loop ? ` of ${Math.min(e.maxItems, e.itemsAvailable)}` : ''}</p>}
+      {ending && e.status !== 'cancelled' && <p className="callout"><Link to={`/next/${e.id}`}>{e.status === 'completed' ? 'Finished. Choose what’s next' : 'About to end. Choose what’s next'}</Link></p>}
+      {mode === 'view' && isLive && (
         <div className="actions left">
           {e.status === 'active' ? <button className="btn secondary" disabled={busy} onClick={() => run({ action: 'pause' })}>Pause</button>
             : <button className="btn primary" disabled={busy} onClick={() => run({ action: 'resume' })}>Resume</button>}
@@ -73,6 +81,8 @@ export function Manage() {
   const [params] = useSearchParams();
   const [me, setMe] = useState<Me | null>(null);
   const [enrolments, setEnrolments] = useState<Enrolment[] | null>(null);
+  const [limits, setLimits] = useState<Limits | null>(null);
+  const [ending, setEnding] = useState(0);
   const [device, setDevice] = useState<DeviceState>('checking');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(params.get('already') ? 'You already follow that topic. Change its times below.' : null);
@@ -81,8 +91,10 @@ export function Manage() {
 
   const load = useCallback(async () => {
     try {
-      const [m, list] = await Promise.all([ns.getMe(), ns.listEnrolments()]);
-      setMe(m); setEnrolments(list);
+      const [m, list, lim] = await Promise.all([ns.getMe(), app.enrolments(), app.limits()]);
+      setMe(m); setEnrolments(list); setLimits(lim);
+      // Paid privileges ending within 3 days: one quiet reminder.
+      api<{ mine: { endingSoon: boolean }[] }>('GET', '/api/upgrade/catalog').then((c) => setEnding(c.mine.filter((x) => x.endingSoon).length)).catch(() => undefined);
       const support = ns.detectSupport();
       if (!support.supported) return setDevice('unsupported');
       if (ns.permission() === 'denied') return setDevice('blocked');
@@ -132,6 +144,8 @@ export function Manage() {
       <h1>My notes</h1>
       <p className="muted">Signed in as {user.name}</p>
       {notice && <div className="callout" role="status">{notice}</div>}
+      {live.length > 0 && <InstallCard />}
+      {ending > 0 && <div className="callout" role="status">{ending === 1 ? 'A paid privilege ends' : `${ending} paid privileges end`} in under 3 days. <Link to="/upgrade">Renew</Link> or keep growing on <Link to="/growth">Grow with us</Link>.</div>}
       {error && <div className="callout warn" role="alert">{error}</div>}
 
       {device === 'off' && live.length > 0 && (
@@ -152,7 +166,7 @@ export function Manage() {
       {enrolments === null ? <p className="muted" aria-busy="true">Loading…</p> : (
         <>
           {live.length === 0 && <p>You have no notes scheduled right now.</p>}
-          <ul className="enrolments">{live.map((e) => <EnrolmentCard key={e.id} e={e} maxTimes={me?.maxSlots ?? 3} onChanged={load} />)}</ul>
+          <ul className="enrolments">{live.map((e) => <EnrolmentCard key={e.id} e={e} maxTimes={limits?.perTopic[e.topicId]?.maxSlots ?? me?.maxSlots ?? 3} onChanged={load} />)}</ul>
           <Link className="btn secondary" to="/start">Add a topic</Link>
           {past.length > 0 && (<><h2>Earlier</h2><ul className="enrolments">{past.map((e) => <EnrolmentCard key={e.id} e={e} maxTimes={3} onChanged={load} />)}</ul></>)}
         </>

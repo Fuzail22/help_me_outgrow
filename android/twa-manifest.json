@@ -1,0 +1,22 @@
+{
+  "packageId": "com.htsta.outgrow",
+  "host": "outgrow.htsta.com",
+  "name": "help me outgrow",
+  "launcherName": "outgrow",
+  "display": "standalone",
+  "themeColor": "#2f6f6a",
+  "navigationColor": "#2f6f6a",
+  "backgroundColor": "#fbf7f2",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://outgrow.htsta.com/icons/512.png",
+  "maskableIconUrl": "https://outgrow.htsta.com/icons/512.png",
+  "webManifestUrl": "https://outgrow.htsta.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "orientation": "portrait",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "signingKey": { "path": "./android.keystore", "alias": "outgrow" },
+  "minSdkVersion": 21
+}

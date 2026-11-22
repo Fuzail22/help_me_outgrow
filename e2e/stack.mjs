@@ -53,7 +53,7 @@ export async function startStack({ quiet = true } = {}) {
     const tsx = join(NS, 'server', 'node_modules', '.bin', 'tsx');
     // 1. Tenant with its own VAPID pair and keys, exactly as an operator would create it.
     const tenant = JSON.parse(execFileSync(tsx, ['scripts/bootstrap-tenant.ts', '--name', 'help me outgrow', '--slug', 'hmo', '--origin', APP,
-      '--click-url', `${APP}/n/{deliveryId}?t={token}`, '--icon', '/icons/192.png'], { cwd: join(NS, 'server'), env: { ...process.env, ...platformEnv }, stdio: ['ignore', 'pipe', 'ignore'] }).toString());
+      '--click-url', `${APP}/n/{deliveryId}?t={token}`, '--icon', '/icons/192.png', '--privileged'], { cwd: join(NS, 'server'), env: { ...process.env, ...platformEnv }, stdio: ['ignore', 'pipe', 'ignore'] }).toString());
     // 2. Platform.
     run('platform', tsx, ['src/index.ts'], join(NS, 'server'), platformEnv);
     await waitFor(`${PLATFORM}/healthz`);
@@ -62,7 +62,8 @@ export async function startStack({ quiet = true } = {}) {
     // 4. Thin backend.
     run('api', join(HMO, 'api', 'node_modules', '.bin', 'tsx'), ['src/index.ts'], join(HMO, 'api'), {
       PORT: String(PORTS.api), SESSION_SECRET: randomBytes(32).toString('hex'), APP_ORIGIN: APP, PLATFORM_API_URL: PLATFORM,
-      PLATFORM_SECRET_KEY: tenant.secretKey, DEV_LOGIN: '1',
+      PLATFORM_SECRET_KEY: tenant.secretKey, DEV_LOGIN: '1', PAYMENTS_MOCK: '1', ADMIN_OWNER_EMAIL: 'owner@dev.invalid', PUBLIC_URL: `http://localhost:${PORTS.api}`,
+      ...(process.env.HMO_API_EXTRA_ENV ? JSON.parse(process.env.HMO_API_EXTRA_ENV) : {}),
     });
     await waitFor(`http://localhost:${PORTS.api}/auth/healthz`);
     // 5. Web app: a production build, served by vite preview.

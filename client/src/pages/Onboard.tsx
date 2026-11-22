@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { Config, Enrolment } from '@notification-service/sdk';
-import { ns } from '../lib/ns';
+import { app, ns, type PublicConfig } from '../lib/ns';
+import { NotEnough, type NotEnoughInfo } from '../components/NotEnough';
 import { useSession } from '../lib/session';
 import { SignIn } from '../components/SignIn';
 import { IosGuide } from '../components/IosGuide';
@@ -9,10 +10,10 @@ import { rememberDeviceStopped } from '../components/Reconnect';
 import { needsHomeScreen } from '../lib/ios';
 import { SchedulePicker, scheduleValid } from '../components/SchedulePicker';
 import { CareNote } from '../components/Layout';
-import { browserTimezone, describeSchedule, DURATIONS, endDateFor, formatDate, formatWhen, timezones, toSlots } from '../lib/time';
+import { browserTimezone, describeSchedule, DURATIONS, endDateFor, formatDate, formatWhen, lastFittingEnd, notesNeeded, timezones, todayIn, toSlots } from '../lib/time';
 
 type Step = 'topic' | 'times' | 'duration' | 'signin' | 'permission' | 'done';
-interface Draft { topicId: string | null; days: number[]; times: string[]; durationDays: number; timezone: string }
+interface Draft { topicId: string | null; days: number[]; times: string[]; durationDays: number; timezone: string; loop?: boolean; endDate?: string | null }
 const DRAFT_KEY = 'hmo_draft';
 const loadDraft = (): Draft => {
   try { const d = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? 'null'); if (d) return d; } catch { /* ignore */ }
@@ -32,13 +33,33 @@ export function Onboard() {
   const [problem, setProblem] = useState<null | { kind: 'denied' | 'dismissed' | 'ios' | 'unsupported' | 'error'; message?: string }>(null);
   const [enrolment, setEnrolment] = useState<Enrolment | null>(null);
   const [interest, setInterest] = useState(false);
+  const [pub, setPub] = useState<PublicConfig | null>(null);
+  const [short, setShort] = useState<NotEnoughInfo | null>(null);
+  // Signed in: the topics this person may follow (their own VAVP3 topics included), from our api.
+  const [mine, setMine] = useState<Config['topics'] | null>(null);
+  useEffect(() => { if (user) app.limits().then((l) => setMine(l.topics.map((t) => ({ id: t.id, slug: t.slug, title: t.title, description: t.description, itemCount: t.itemCount, sensitive: t.sensitive })))).catch(() => undefined); }, [user]);
 
-  useEffect(() => { ns.getConfig().then(setConfig).catch(() => setLoadError(true)); void ns.track('onboard_start'); }, []);
+  useEffect(() => { ns.getConfig().then(setConfig).catch(() => setLoadError(true)); app.publicConfig().then(setPub).catch(() => undefined); void ns.track('onboard_start'); }, []);
   useEffect(() => { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); }, [draft]);
 
-  const topic = useMemo(() => config?.topics.find((t) => t.id === draft.topicId) ?? null, [config, draft.topicId]);
+  const topicList = mine ?? config?.topics ?? [];
+  const topic = useMemo(() => topicList.find((t) => t.id === draft.topicId) ?? null, [topicList, draft.topicId]);
   const slots = toSlots(draft.days, draft.times);
-  const endDate = endDateFor(draft.timezone, draft.durationDays);
+  // An end date chosen to fit a short topic wins over the duration chips.
+  const endDate = draft.endDate ?? endDateFor(draft.timezone, draft.durationDays);
+  const durations = pub?.durations ?? DURATIONS;
+  const maxTimes = pub?.baseSlots ?? config?.limits.maxSlots ?? 3;
+  // The owner's rule: no schedule that needs more notes than the topic has (unless it loops). Checked again on the server.
+  const fits = (d: Draft, t = topic) => {
+    if (!t || d.loop) return null;
+    const start = todayIn(d.timezone); const end = d.endDate ?? endDateFor(d.timezone, d.durationDays); const sl = toSlots(d.days, d.times);
+    const available = Math.min(t.itemCount, pub?.baseItems ?? 90); const needed = notesNeeded(sl, start, end);
+    if (needed <= available) return null;
+    const perDayTimes = d.times.length; let fewer = perDayTimes;
+    while (fewer > 1 && Math.ceil((needed / perDayTimes) * fewer) > available) fewer--;
+    return { needed, available, endDate: lastFittingEnd(sl, start, end, available), timesPerDay: Math.ceil((needed / perDayTimes) * fewer) <= available ? fewer : null };
+  };
+  const tooShort = fits(draft);
   const support = ns.detectSupport();
 
   const afterSignIn = () => setStep('permission');
@@ -59,9 +80,11 @@ export function Onboard() {
       void ns.track('permission_granted', {}, { signedIn: true });
       await ns.completeProfile({ timezone: draft.timezone });
       try {
-        setEnrolment(await ns.createEnrolment({ topicId: draft.topicId!, slots, timezone: draft.timezone, endDate }));
+        setEnrolment(await app.createEnrolment({ topicId: draft.topicId!, slots, timezone: draft.timezone, endDate, ...(draft.loop ? { loop: true } : {}) }) as any);
       } catch (e: any) {
         if (e.code === 'already_enrolled') { sessionStorage.removeItem(DRAFT_KEY); navigate('/manage?already=1'); return; }
+        if (e.code === 'slot_too_close') { setProblem({ kind: 'error', message: `You already get a note at ${e.details?.conflictsWith} on another topic. Notes need to be at least ${e.details?.gap} minutes apart: go back and pick another time.` }); return; }
+        if (e.code === 'not_enough_quotes') { setShort({ needed: e.details.needed, available: e.details.available, endDate: e.details.options.endDate, timesPerDay: e.details.options.timesPerDay }); setStep('duration'); return; }
         throw e;
       }
       sessionStorage.removeItem(DRAFT_KEY);
@@ -87,7 +110,7 @@ export function Onboard() {
         <>
           <h1>What are you going through?</h1>
           <div className="cards">
-            {config.topics.map((t) => (
+            {topicList.map((t) => (
               <button key={t.id} className={'card' + (draft.topicId === t.id ? ' on' : '')} aria-pressed={draft.topicId === t.id}
                 onClick={() => { setDraft({ ...draft, topicId: t.id }); void ns.track('topic_picked', { topic: t.slug }); setStep('times'); }}>
                 <strong>{t.title}</strong><span>{t.description}</span>
@@ -101,7 +124,7 @@ export function Onboard() {
         <>
           <h1>When should a note arrive?</h1>
           <p className="muted">For “{topic.title}”. Choose moments when a few kind words would help most.</p>
-          <SchedulePicker days={draft.days} times={draft.times} maxTimes={config.limits.maxSlots} onChange={(v) => setDraft({ ...draft, ...v })} />
+          <SchedulePicker days={draft.days} times={draft.times} maxTimes={maxTimes} onChange={(v) => setDraft({ ...draft, ...v, endDate: null })} />
           <div className="actions">
             <button className="btn secondary" onClick={() => setStep('topic')}>Back</button>
             <button className="btn primary" disabled={!scheduleValid(draft.days, draft.times)} onClick={() => { void ns.track('slots_picked', { days: draft.days.length, times: draft.times.length }); setStep('duration'); }}>Continue</button>
@@ -113,11 +136,17 @@ export function Onboard() {
         <>
           <h1>For how long?</h1>
           <div className="chips big" role="radiogroup" aria-label="Duration">
-            {DURATIONS.map((d) => (
-              <button key={d.days} role="radio" aria-checked={draft.durationDays === d.days} className={'chip' + (draft.durationDays === d.days ? ' on' : '')} onClick={() => setDraft({ ...draft, durationDays: d.days })}>{d.label}</button>
+            {durations.map((d) => (
+              <button key={d.days} role="radio" aria-checked={!draft.endDate && draft.durationDays === d.days} className={'chip' + (!draft.endDate && draft.durationDays === d.days ? ' on' : '')} onClick={() => { setShort(null); setDraft({ ...draft, durationDays: d.days, endDate: null }); }}>{d.label}</button>
             ))}
           </div>
-          <p className="muted">Until {formatDate(endDate)}. You can stop sooner, any time.</p>
+          <p className="muted">Until {formatDate(endDate)}. You can stop sooner, any time.{draft.loop ? ' When the notes run out, they start again from the first.' : ''}</p>
+          {(short ?? tooShort) && (
+            <NotEnough info={(short ?? tooShort)!}
+              onEndDate={(d) => { setShort(null); setDraft({ ...draft, endDate: d }); }}
+              onTimes={(n) => { setShort(null); setDraft({ ...draft, times: draft.times.slice(0, n), endDate: null }); }}
+              onLoop={() => { setShort(null); setDraft({ ...draft, loop: true }); }} />
+          )}
           <label className="field">Your timezone
             <select value={draft.timezone} onChange={(e) => setDraft({ ...draft, timezone: e.target.value })}>
               {[...new Set([draft.timezone, ...timezones()])].map((z) => <option key={z} value={z}>{z.replace(/_/g, ' ')}</option>)}
@@ -127,7 +156,7 @@ export function Onboard() {
           {topic.sensitive && <div className="callout"><CareNote /></div>}
           <div className="actions">
             <button className="btn secondary" onClick={() => setStep('times')}>Back</button>
-            <button className="btn primary" onClick={() => setStep(user ? 'permission' : 'signin')}>Continue</button>
+            <button className="btn primary" disabled={!!(short ?? tooShort)} onClick={() => setStep(user ? 'permission' : 'signin')}>Continue</button>
           </div>
         </>
       )}
