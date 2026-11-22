@@ -8,6 +8,8 @@ import { activeEntitlements, JOURNAL_TOPIC_SLUG } from '../limits.js';
 import { getSettings } from '../settings.js';
 import { checkText } from '../content.js';
 import { audit, type AdminRequest } from '../admin/auth.js';
+import express from 'express';
+import { apply, plan, readZip } from '../importer.js';
 import type { AdminRole, OwnTopic, User } from '../store/schema.js';
 
 const lineBody = z.object({ body: z.string().trim().min(1).max(300), attribution: z.string().trim().max(120).nullish() });
@@ -101,6 +103,19 @@ export function topicAdminRoutes(ctx: Ctx) {
       const l = await ctx.platform.editLine(req.params.id, req.params.lineId, parse(lineBody, req.body));
       await audit(ctx, who(req), 'line.edit', `${req.params.id} #${l.number}`, before ? { body: before.body } : null, { body: l.body });
       res.json(withWarnings(l));
+    }));
+    /** G10: bulk import from a zip of CSVs. `?dryRun=1` previews and saves nothing. Body: the zip (application/zip). */
+    api.post(`${A}/topics/import`, express.raw({ type: ['application/zip', 'application/x-zip-compressed', 'application/octet-stream'], limit: '5mb' }), need('editor'), h(async (req, res) => {
+      if (!Buffer.isBuffer(req.body) || !req.body.length) throw new HttpError(422, 'invalid_zip', 'Send the zip file as the request body');
+      const items = await plan(ctx, readZip(req.body));
+      const view = (it: Awaited<ReturnType<typeof plan>>[number]) => ({
+        file: it.file, slug: it.slug, action: it.action, title: it.meta.title, visibility: it.meta.visibility ?? (it.action === 'create' ? 'private' : null),
+        existingNotes: it.existingNotes, adding: it.add.length, duplicates: it.duplicates, warnings: it.warnings, changes: it.changes, errors: it.errors,
+        sample: it.add.slice(0, 3).map((n) => ({ body: n.body, link: n.clickUrl, media: n.imageUrl, warnings: n.warnings.map((w) => w.match) })),
+      });
+      if (req.query.dryRun) return res.json({ dryRun: true, topics: items.map(view) });
+      const results = await apply(ctx, items, (action, target, after) => audit(ctx, who(req), action, target, null, after));
+      res.json({ dryRun: false, topics: items.map(view), results });
     }));
     api.get(`${A}/own-topics`, need('editor'), h(async (req, res) => {
       const status = ['review', 'live', 'rejected'].includes(String(req.query.status)) ? String(req.query.status) : 'review';

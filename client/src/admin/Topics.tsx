@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useParams } from 'react-router-dom';
 import { admin } from './api';
+import { ImportZip } from './ImportZip';
 
 interface Warning { id: string; why: string; match: string }
 interface T { _id: string; slug: string; title: string; description: string; visibility: 'public' | 'private'; repeat: boolean; sensitive: boolean; itemCount: number; retiredAt?: string | null; own: { userId: string; status: string; visibility: string } | null; system: boolean }
@@ -41,6 +42,7 @@ function List() {
         <label className="check"><input type="checkbox" checked={form.sensitive} onChange={(e) => setForm({ ...form, sensitive: e.target.checked })} /><span>Sensitive (shows care text when people choose it)</span></label>
         <button className="btn primary">Create</button>
       </form>
+      <ImportZip onDone={load} />
       <h2>People’s own topics waiting for review (VAVP3, public)</h2>
       {review.length ? <ul>{review.map((r) => <li key={r._id}><Link to={r.platformTopicId}>{r.title}</Link> by {r.email} — <button className="link" onClick={() => act(() => admin('POST', `/own-topics/${r._id}/approve`))}>Approve and publish</button> · <button className="link danger" onClick={() => act(() => admin('POST', `/own-topics/${r._id}/reject`))}>Reject</button></li>)}</ul> : <p className="muted">None.</p>}
       {error && <p className="error" role="alert">{error}</p>}
