@@ -68,9 +68,10 @@ export class FakePlatform implements Platform {
     return { ...t };
   }
   async lines(topicId: string) { const l = this.linesBy.get(topicId); if (!l) throw new PlatformError(404, 'not_found', 'Topic not found'); return l.map((x) => ({ ...x })); }
-  async appendLines(topicId: string, lines: { body: string }[]) {
+  async appendLines(topicId: string, lines: { body: string; attribution?: string | null; imageUrl?: string | null; clickUrl?: string | null }[]) {
+    this.calls.push({ method: 'appendLines', args: [topicId, lines] });
     const l = this.linesBy.get(topicId)!; const t = this.topicsList.find((x) => x._id === topicId)!;
-    const created = lines.map((x) => { const seq = l.length; const line = { id: `${topicId}_l${seq}`, seq, number: seq + 1, body: x.body, attribution: null, imageUrl: null, state: 'live' as const, actions: null }; l.push(line); return line; });
+    const created = lines.map((x) => { const seq = l.length; const line = { id: `${topicId}_l${seq}`, seq, number: seq + 1, body: x.body, attribution: x.attribution ?? null, imageUrl: x.imageUrl ?? null, clickUrl: x.clickUrl ?? null, state: 'live' as const, actions: null }; l.push(line); return line; });
     t.itemCount = l.length;
     return { created, skip: [] };
   }

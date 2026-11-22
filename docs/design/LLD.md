@@ -174,3 +174,32 @@ fulfil, VAVP3 topic creation, journal encryption at rest (no plaintext in store)
 role matrix, audit. e2e (Playwright, full stack with the real platform): onboarding through the backend,
 level-up celebration and pick, referral visit from a second browser context, mock purchase, next-step page,
 journal write from a quote, admin approves a proof.
+
+## G10. Bulk import of topics from a zip (admin → Topics)
+
+**Input**: one `.zip` (≤ 5 MB, ≤ 100 `.csv` files; other files and `__MACOSX/` are ignored). Each CSV is one topic:
+
+```
+# slug: loss                       ← required, a-z 0-9 -, 2–40
+# title: Loss                      ← required for a new topic
+# description: For when someone or something you loved is gone.
+# sensitive: true                  ← true/false, default false
+# visibility: private              ← private/public, default private
+# repeat: false                    ← start again after the last note, default false
+body,attribution,media,link
+"Grief has no schedule.",,,
+"You are allowed to rest.",A friend,https://…/rest.png,https://…/read-more
+```
+
+Note columns (header row, any order): `body` (required, ≤ 300 characters), `attribution`, `media` (also `image_url`,
+`media_src`; an https image shown with the note — the original design's `media_src`), `link` (also `click_url`; the
+https page the notification opens when tapped, instead of the quote page — the original "open URL" notification).
+
+**Behaviour**: `POST /api/admin/topics/import?dryRun=1` (editor) returns a preview per file — new or existing topic,
+notes to add, exact duplicates skipped, problems, spam-wording warnings — and saves nothing. Without `dryRun` it
+applies: a new slug creates the topic (visibility from the file, default private); an existing slug keeps its notes
+and appends only new ones (title, description, sensitive and repeat are updated; private → public is applied,
+public → private is not). Files with errors are skipped whole; the rest import. One audit entry per topic.
+
+**Platform**: the content API accepts `clickUrl` on append and edit (https only; `{deliveryId}` and `{token}` may be
+used), so a note's link survives the import.
