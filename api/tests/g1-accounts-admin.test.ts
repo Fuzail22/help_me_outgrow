@@ -11,6 +11,9 @@ describe('G1: Zoho sign-in for app users', () => {
     const loc = new URL(start.headers.location);
     expect(loc.origin + loc.pathname).toBe('https://accounts.zoho.in/oauth/v2/auth');
     expect(loc.searchParams.get('redirect_uri')).toBe('https://api.example.test/auth/zoho/callback');
+    // Zoho shows a bare "An error occurred" page for prompt=select_account (only consent is allowed): send none.
+    expect(loc.searchParams.has('prompt')).toBe(false);
+    expect(loc.searchParams.get('scope')).toBe('openid email profile');
     const cookie = String(start.headers['set-cookie']).split(';')[0];
     s.ctx.zohoSignIn = async (i) => { expect(i.nonce).toBe(loc.searchParams.get('nonce')); return { sub: 'z-1', email: 'Ravi@Example.test', name: 'Ravi', emailVerified: true }; };
     const cb = await request(s.app).get(`/auth/zoho/callback?code=c&state=${loc.searchParams.get('state')}`).set('cookie', cookie).expect(302);
