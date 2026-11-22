@@ -1,11 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Route, Routes, useParams } from 'react-router-dom';
 import { admin } from './api';
 import { ImportZip } from './ImportZip';
 
 interface Warning { id: string; why: string; match: string }
 interface T { _id: string; slug: string; title: string; description: string; visibility: 'public' | 'private'; repeat: boolean; sensitive: boolean; itemCount: number; retiredAt?: string | null; own: { userId: string; status: string; visibility: string } | null; system: boolean }
-interface L { id: string; number: number; body: string; attribution: string | null; warnings: Warning[] }
+interface L { id: string; number: number; body: string; attribution: string | null; status?: 'active' | 'retired'; warnings: Warning[] }
+
+/** Same words once case, accents and punctuation are ignored. */
+const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+const words = (s: string) => new Set(norm(s).split(' ').filter(Boolean));
+const overlap = (a: Set<string>, b: Set<string>) => { let n = 0; for (const w of a) if (b.has(w)) n++; return n / Math.max(1, a.size + b.size - n); };
+/**
+ * Notes still sending that repeat, or nearly repeat, another note: for each, the numbers of the notes it matches.
+ * Both sides of a pair are listed, so the editor chooses which copy to remove.
+ */
+export function likelyDuplicates(lines: L[], near = 0.8): Map<string, number[]> {
+  const live = lines.filter((l) => l.status !== 'retired').map((l) => ({ l, key: norm(l.body), w: words(l.body) }));
+  const out = new Map<string, number[]>();
+  const add = (id: string, n: number) => out.set(id, [...(out.get(id) ?? []), n]);
+  for (let i = 0; i < live.length; i++) for (let j = i + 1; j < live.length; j++) {
+    const a = live[i], b = live[j];
+    if (a.key === b.key || overlap(a.w, b.w) >= near) { add(a.l.id, b.l.number); add(b.l.id, a.l.number); }
+  }
+  return out;
+}
 
 export function Topics() {
   return <Routes><Route path="/" element={<List />} /><Route path=":id" element={<Detail />} /></Routes>;
@@ -57,19 +76,27 @@ function Detail() {
   const [check, setCheck] = useState<Warning[] | null>(null);
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dupesOnly, setDupesOnly] = useState(false);
   const load = () => admin<{ lines: L[] }>('GET', `/topics/${id}/lines`).then((r) => setLines(r.lines));
   useEffect(() => { void load(); }, [id]);
   const act = async (fn: () => Promise<unknown>) => { setError(null); try { await fn(); await load(); } catch (e: any) { setError(e.message); } };
   const flagged = lines.filter((l) => l.warnings.length).length;
+  const dupes = useMemo(() => likelyDuplicates(lines), [lines]);
+  const removed = lines.filter((l) => l.status === 'retired').length;
+  const remove = (l: L) => { if (window.confirm(`Remove note ${l.number}? It stops being sent. Nobody's place in the course moves, and you can restore it later.`)) void act(() => admin('POST', `/topics/${id}/lines/${l.id}/remove`)); };
+  const shown = dupesOnly ? lines.filter((l) => dupes.has(l.id)) : lines;
   return (
     <>
       <p className="small"><Link to="/admin/topics">← Topics</Link></p>
       <h1>Notes</h1>
-      <p className="muted">{lines.length} notes{flagged ? ` · ${flagged} may look like spam to Chrome (hover the flag for why)` : ''}.</p>
-      <ol className="own-lines">{lines.map((l) => (
-        <li key={l.id}>{editing?.id === l.id
+      <p className="muted">{lines.length - removed} notes{removed ? ` (${removed} removed)` : ''}{flagged ? ` · ${flagged} may look like spam to Chrome (hover the flag for why)` : ''}.</p>
+      <label className="check"><input type="checkbox" checked={dupesOnly} onChange={(e) => setDupesOnly(e.target.checked)} /><span>Show likely duplicates only ({dupes.size})</span></label>
+      <ol className="own-lines">{shown.map((l) => (
+        <li key={l.id} value={l.number} className={l.status === 'retired' ? 'muted' : undefined}>{l.status === 'retired'
+          ? <><s>{l.body}</s> <span className="small">removed</span> <button className="link small" onClick={() => act(() => admin('POST', `/topics/${id}/lines/${l.id}/restore`))}>Restore</button></>
+          : editing?.id === l.id
           ? <span className="inline-form"><input aria-label={`Note ${l.number}`} value={editing.body} onChange={(e) => setEditing({ ...editing, body: e.target.value })} /><button className="btn primary" onClick={() => act(async () => { await admin('PATCH', `/topics/${id}/lines/${l.id}`, { body: editing.body }); setEditing(null); })}>Save</button><button className="link" onClick={() => setEditing(null)}>Cancel</button></span>
-          : <>{l.body} <Flags w={l.warnings} /> <button className="link small" onClick={() => setEditing({ id: l.id, body: l.body })}>Edit</button></>}</li>
+          : <>{l.body} <Flags w={l.warnings} />{dupes.has(l.id) && <span className="draft-flag">like note {dupes.get(l.id)!.join(', ')}</span>} <button className="link small" onClick={() => setEditing({ id: l.id, body: l.body })}>Edit</button> · <button className="link small danger" onClick={() => remove(l)}>Remove</button></>}</li>
       ))}</ol>
       <label className="field">Add notes at the end, one per line<textarea rows={5} value={text} onChange={(e) => { setText(e.target.value); setCheck(null); }} /></label>
       <div className="actions left">
