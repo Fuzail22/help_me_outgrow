@@ -151,11 +151,31 @@ export async function plan(ctx: Ctx, files: { name: string; text: string }[]): P
   return out;
 }
 
+type LineIn = { body: string; attribution: string | null; imageUrl: string | null; clickUrl: string | null };
+
+/**
+ * Splits notes into append requests the platform accepts: its JSON body limit is 64 KB, so each request stays under
+ * BATCH.bytes of serialized JSON (Tamil and other scripts take 3 bytes a character) and BATCH.lines notes. Order is kept.
+ */
+export const BATCH = { bytes: 56 * 1024, lines: 1000 };
+export function batches(lines: LineIn[]): LineIn[][] {
+  const out: LineIn[][] = []; let cur: LineIn[] = []; let size = 0;
+  const envelope = Buffer.byteLength('{"lines":[]}');
+  for (const l of lines) {
+    const n = Buffer.byteLength(JSON.stringify(l)) + 1; // + the comma between items
+    if (cur.length && (envelope + size + n > BATCH.bytes || cur.length >= BATCH.lines)) { out.push(cur); cur = []; size = 0; }
+    cur.push(l); size += n;
+  }
+  if (cur.length) out.push(cur);
+  return out;
+}
+
 /** Applies a plan: files with problems are skipped whole; the rest create topics or append new notes. */
 export async function apply(ctx: Ctx, items: PlanItem[], audit: (action: string, target: string, after: unknown) => Promise<void>) {
   const results: { file: string; slug: string | null; action: PlanItem['action']; added: number; error: string | null }[] = [];
   for (const it of items) {
     if (it.action === 'skip') { results.push({ file: it.file, slug: it.slug, action: 'skip', added: 0, error: it.errors.join('; ') }); continue; }
+    let added = 0;
     try {
       let topicId = it.topicId;
       if (it.action === 'create') {
@@ -170,15 +190,16 @@ export async function apply(ctx: Ctx, items: PlanItem[], audit: (action: string,
         if (it.meta.visibility === 'public') patch.visibility = 'public';
         if (Object.keys(patch).length) await ctx.platform.patchTopic(topicId!, patch);
       }
-      let added = 0;
-      for (let i = 0; i < it.add.length; i += 1000) {
-        const r = await ctx.platform.appendLines(topicId!, it.add.slice(i, i + 1000).map((n) => ({ body: n.body, attribution: n.attribution, imageUrl: n.imageUrl, clickUrl: n.clickUrl })));
+      for (const batch of batches(it.add.map((n) => ({ body: n.body, attribution: n.attribution, imageUrl: n.imageUrl, clickUrl: n.clickUrl })))) {
+        const r = await ctx.platform.appendLines(topicId!, batch);
         added += r.created.length;
       }
       await audit(it.action === 'create' ? 'topic.import_create' : 'topic.import_append', it.slug!, { file: it.file, added, meta: it.meta });
       results.push({ file: it.file, slug: it.slug, action: it.action, added, error: null });
     } catch (e) {
-      results.push({ file: it.file, slug: it.slug, action: it.action, added: 0, error: (e as Error).message });
+      // Earlier batches are saved; importing the same file again adds only the notes that are still missing.
+      const msg = (e as Error).message;
+      results.push({ file: it.file, slug: it.slug, action: it.action, added, error: added ? `${msg} (${added} notes were saved; import the file again to add the rest)` : msg });
     }
   }
   return results;
