@@ -44,7 +44,7 @@ export function authorizeUrl(cfg: ZohoConfig & { redirectUri: string }, p: { sta
   const u = new URL('/oauth/v2/auth', cfg.accountsUrl);
   u.search = new URLSearchParams({
     response_type: 'code', client_id: cfg.clientId!, scope: 'openid email profile', redirect_uri: cfg.redirectUri,
-    state: p.state, nonce: p.nonce, code_challenge: p.challenge, code_challenge_method: 'S256', prompt: 'select_account', access_type: 'online',
+    state: p.state, nonce: p.nonce, code_challenge: p.challenge, code_challenge_method: 'S256', access_type: 'online',
   }).toString();
   return u.toString();
 }
