@@ -27,6 +27,8 @@ def make_zip(name, topics):
         for p in sorted(out.glob('*.csv')): f.write(p, p.name)
     print(name, len(topics), 'files', sum(len(t[3]) for t in topics), 'notes', z.stat().st_size, 'bytes')
 
-six = [(s, t, d, [(b, None) for b in year.year(k)]) for s, t, d, k in SIX]
-make_zip('topics-1.zip', six + scripture.thirukkural() + scripture.quran())
-make_zip('topics-2-bible.zip', scripture.bible())
+def six(): return [(s, t, d, [(b, None) for b in year.year(k)]) for s, t, d, k in SIX]
+
+if __name__ == '__main__':
+    make_zip('topics-1.zip', six() + scripture.thirukkural() + scripture.quran())
+    make_zip('topics-2-bible.zip', scripture.bible())
