@@ -1,10 +1,25 @@
-name: Deploy api (manual)
+name: Deploy api
+# Deploys automatically when a merge to main changes the api (or how it is deployed), after CI passes on that
+# commit. It can also be started by hand.
 # Every runtime setting lives in the GitHub `production` environment (secrets and variables), shared with the
 # client build. This workflow copies the api's settings to Fly as staged secrets, then deploys.
 on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - ".github/workflows/deployApi.yml"
+      - ".github/workflows/ci.yml"
+      - ".github/scripts/**"
   workflow_dispatch:
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
   deploy:
+    needs: ci
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -34,3 +49,7 @@ jobs:
       - name: Deploy
         working-directory: ./api
         run: flyctl deploy --remote-only --ha=false
+      - name: Check the live api answers
+        run: .github/scripts/wait-healthy.sh "${API_URL%/}/auth/healthz"
+        env:
+          API_URL: ${{ vars.API_URL }}
