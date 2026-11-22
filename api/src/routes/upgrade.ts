@@ -4,7 +4,7 @@ import type { Ctx } from '../context.js';
 import { h, HttpError, parse } from '../http.js';
 import { newId } from '../ids.js';
 import { sessionUser } from '../session.js';
-import { getSettings } from '../settings.js';
+import { getSettings, MIN_CHARGE } from '../settings.js';
 import { activeEntitlements, topicsFor } from '../limits.js';
 import { applyItems } from '../growth.js';
 import { DuplicateKeyError } from '../store/types.js';
@@ -69,6 +69,7 @@ export function upgradeRoutes(ctx: Ctx, api: Router) {
     if (!ch) throw new HttpError(409, 'not_available_here', 'Payments are not available in your country yet; join the waitlist');
     const price = await priceOf(ctx, user, pricing, product, ch.currency, product.needsTopic ? b.topicId! : null);
     if (!('amountMinor' in price)) throw new HttpError(409, 'not_available', price.unavailable);
+    if (price.amountMinor < MIN_CHARGE) throw new HttpError(409, 'not_available', 'This item is not for sale right now');
     const order: Order = {
       _id: newId('ord_'), userId: user._id, product: product.id, topicId: product.needsTopic ? b.topicId! : null, units: product.amount, amountMinor: price.amountMinor, currency: ch.currency,
       provider: ch.provider.name, providerOrderId: null, providerPaymentId: null, status: 'created', rank: null, termMonths: null, createdAt: ctx.now(), paidAt: null,
@@ -80,6 +81,7 @@ export function upgradeRoutes(ctx: Ctx, api: Router) {
       res.status(201).json({ orderId: order._id, provider: ch.provider.name, amountMinor: order.amountMinor, currency: order.currency, checkout: r.checkout });
     } catch (e) {
       await ctx.store.orders.updateOne({ _id: order._id }, { $set: { status: 'failed' } });
+      if (e instanceof PaymentError) ctx.log({ level: e.code === 'provider_auth' ? 'alert' : 'error', msg: 'create_order_failed', provider: order.provider, code: e.code, detail: e.message });
       throw e instanceof PaymentError ? new HttpError(502, e.code, 'The payment provider is not answering; please try again') : e;
     }
   }));

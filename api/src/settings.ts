@@ -44,6 +44,12 @@ export const pricingSchema = z.object({
   usd: z.object({ vavp1Unit: z.number().int().min(0), vavp1Bundle3: z.number().int().min(0), vavp2: z.array(z.number().int().min(0)), vavp3Private: z.number().int().min(0), vavp3Public: z.number().int().min(0) }),
 });
 export type PricingSettings = z.infer<typeof pricingSchema>;
+/** Razorpay's smallest charge is 100 subunits (₹1 or $1.00 → 100 paise or cents); 0 is allowed and means free. */
+export const MIN_CHARGE = 100;
+function pricesOf(p: PricingSettings): number[] {
+  return [...p.vavp1Units, p.vavp1Bundle3, ...p.vavp2.map((x) => x.price), p.vavp3.private.start, p.vavp3.public.start,
+    p.usd.vavp1Unit, p.usd.vavp1Bundle3, ...p.usd.vavp2, p.usd.vavp3Private, p.usd.vavp3Public];
+}
 
 export const DEFAULTS = {
   limits: {
@@ -74,10 +80,10 @@ export const DEFAULTS = {
     // Buyer rank per product → months: first 10 a year, next 10 six months, next 50 three, everyone after one.
     terms: [{ upTo: 10, months: 12 }, { upTo: 20, months: 6 }, { upTo: 70, months: 3 }, { upTo: null, months: 1 }],
     // Cents.
-    usd: { vavp1Unit: 99, vavp1Bundle3: 299, vavp2: [99, 299], vavp3Private: 499, vavp3Public: 799 },
+    usd: { vavp1Unit: 100, vavp1Bundle3: 299, vavp2: [100, 299], vavp3Private: 499, vavp3Public: 799 },
   } satisfies PricingSettings,
 };
-const SCHEMAS = { limits: limitsSchema, growth: growthSchema, pricing: pricingSchema };
+const SCHEMAS = { limits: limitsSchema, growth: growthSchema, pricing: pricingSchema.refine((p) => pricesOf(p).every((x) => x === 0 || x >= MIN_CHARGE), 'Every price must be at least ₹1 / $1.00 (100 paise or cents), or 0') };
 export type SettingsId = keyof typeof SCHEMAS;
 type Of<K extends SettingsId> = K extends 'limits' ? LimitsSettings : K extends 'growth' ? GrowthSettings : PricingSettings;
 

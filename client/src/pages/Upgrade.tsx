@@ -41,8 +41,17 @@ export function Upgrade() {
         const rzp = new (window as any).Razorpay({
           key: o.checkout.keyId, order_id: o.checkout.orderId, amount: o.checkout.amount, currency: o.checkout.currency, name: o.checkout.name, description: o.checkout.description,
           prefill: o.checkout.prefill, theme: { color: '#2f6f6a' },
-          handler: async (r: Record<string, string>) => { await api('POST', `/api/upgrade/orders/${o.orderId}/verify`, r); navigate(`/upgrade/done?order=${o.orderId}`); },
-          modal: { ondismiss: () => setBusy(null) },
+          handler: async (r: Record<string, string>) => {
+            setError(null);
+            try { await api('POST', `/api/upgrade/orders/${o.orderId}/verify`, r); }
+            catch { /* the webhook still confirms a genuine payment; the next page waits for it */ }
+            navigate(`/upgrade/done?order=${o.orderId}`);
+          },
+          modal: { ondismiss: () => { setBusy(null); setError((x) => x ?? 'Payment window closed. Nothing was charged.'); } },
+        });
+        // A declined card or a failed UPI attempt: Razorpay keeps the window open so the person can retry; tell them why.
+        rzp.on('payment.failed', (r: { error?: { description?: string; reason?: string } }) => {
+          setError(`The payment did not go through${r.error?.description ? `: ${r.error.description}` : ''}. You can try again or use another method.`);
         });
         rzp.open();
         return;

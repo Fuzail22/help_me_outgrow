@@ -35,6 +35,7 @@ export function razorpay(o: { keyId: string; keySecret: string; webhookSecret: s
         body: JSON.stringify({ amount: i.amountMinor, currency: i.currency, receipt: i.orderId, notes: { orderId: i.orderId } }),
       });
       const b = (await r.json().catch(() => ({}))) as any;
+      if (r.status === 401) throw new PaymentError('provider_auth', 'Razorpay refused the API keys: check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET (test and live keys must not be mixed)');
       if (!r.ok || !b.id) throw new PaymentError('provider_error', b?.error?.description ?? `Razorpay answered ${r.status}`);
       // Razorpay Checkout (UPI intent/QR, cards, netbanking, wallets) opens in the page with these.
       return { providerOrderId: b.id, checkout: { keyId: o.keyId, orderId: b.id, amount: i.amountMinor, currency: i.currency, name: 'help me outgrow', description: i.description, prefill: { email: i.email, name: i.name } } };

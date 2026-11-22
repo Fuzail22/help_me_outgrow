@@ -34,7 +34,7 @@ export function Pricing() {
           <p>Early buyers of each product get longer:</p>
           <ul>{p.terms.map((t, i) => <li key={i}>{t.upTo === null ? 'Everyone after' : `Buyers up to number ${t.upTo}`}: {t.months} months</li>)}</ul>
           <p>A purchase is a one-time payment for that period. Nothing renews automatically; we remind you three days before it ends.</p>
-          {p.international && <><h2>Outside India</h2><p>Prices in US dollars: one more notification a day {d(p.usd.vavp1Unit)} (three for {d(p.usd.vavp1Bundle3)}), more notes from {d(p.usd.vavp2[0] ?? 99)}, your own topic {d(p.usd.vavp3Private)} (private) or {d(p.usd.vavp3Public)} (public).</p></>}
+          {p.international && <><h2>Outside India</h2><p>Prices in US dollars: one more notification a day {d(p.usd.vavp1Unit)} (three for {d(p.usd.vavp1Bundle3)}), more notes from {d(p.usd.vavp2[0] ?? 100)}, your own topic {d(p.usd.vavp3Private)} (private) or {d(p.usd.vavp3Public)} (public).</p></>}
         </>
       )}
       <p>Payments are handled by Razorpay: UPI, cards, netbanking and wallets in India, and international cards in US dollars elsewhere. We never see your card or UPI details. See <Link to="/refunds">refunds</Link> and <Link to="/terms">terms</Link>.</p>

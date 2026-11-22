@@ -110,6 +110,34 @@ describe('G5: Razorpay', () => {
   });
 });
 
+describe('G5: Razorpay checks from its integration checklist', () => {
+  it('refuses prices under ₹1 / $1.00 (Razorpay minimum, 100 paise or cents); 0 is allowed', async () => {
+    const s = await setup({ adminOwnerEmail: 'owner@dev.invalid' });
+    const owner = s.as((await s.signIn('Owner')).cookie);
+    const W = { 'x-admin': '1' };
+    expect((await owner.put('/api/admin/settings/pricing', { ...DEFAULTS.pricing, vavp1Units: [50, 5000, 10000] }).set(W).expect(422)).body.error.message).toMatch(/at least ₹1/);
+    await owner.put('/api/admin/settings/pricing', { ...DEFAULTS.pricing, vavp1Units: [0, 5000, 10000] }).set(W).expect(200);
+  });
+  it('wrong API keys: the order fails safely, nothing is charged or granted, and the log says which setting to check', async () => {
+    const s = await setup();
+    s.ctx.payments = createPayments({ razorpay: { keyId: 'rzp_test_bad', keySecret: 'bad', webhookSecret: null, fetch: (async () => ({ ok: false, status: 401, json: async () => ({ error: { description: 'Authentication failed' } }) })) as any } });
+    s.platform.addTopic({ slug: 'loss' });
+    const a = await s.signIn('Asha');
+    const r = await s.as(a.cookie).post('/api/upgrade/orders', { product: 'vavp3_private', tz: 'Asia/Kolkata' }).expect(502);
+    expect(r.body.error.code).toBe('provider_auth');
+    expect(await s.ctx.store.orders.findOne({ userId: a.id })).toMatchObject({ status: 'failed' });
+    expect(s.logs.some((l) => l.msg === 'create_order_failed' && l.level === 'alert' && String(l.detail).includes('RAZORPAY_KEY_SECRET'))).toBe(true);
+    expect(await s.ctx.store.entitlements.count({ userId: a.id })).toBe(0);
+  });
+  it('verify: a missing field is 400 and nothing is marked paid', async () => {
+    const { s, loss } = await shop();
+    const a = await s.signIn('Asha'); const c = s.as(a.cookie);
+    const o = (await c.post('/api/upgrade/orders', { product: 'vavp1_unit', topicId: loss._id, ...india }).expect(201)).body;
+    await c.post(`/api/upgrade/orders/${o.orderId}/verify`, { razorpay_order_id: o.checkout.orderId, razorpay_payment_id: 'pay_1' }).expect(400);
+    expect((await c.get(`/api/upgrade/orders/${o.orderId}`).expect(200)).body.status).toBe('created');
+  });
+});
+
 describe('G5: Razorpay outside India', () => {
   it('with international payments on, a visitor abroad pays in USD through Razorpay; the signed result grants as usual', async () => {
     const s = await setup();

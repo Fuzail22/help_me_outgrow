@@ -62,7 +62,7 @@ export async function priceOf(ctx: Ctx, user: User, p: PricingSettings, product:
   }
   if (product.family === 'vavp2') {
     const i = Number(product.id.split('_')[1]);
-    return { amountMinor: currency === 'INR' ? p.vavp2[i].price : (p.usd.vavp2[i] ?? p.usd.vavp2[0] ?? 99) };
+    return { amountMinor: currency === 'INR' ? p.vavp2[i].price : (p.usd.vavp2[i] ?? p.usd.vavp2[0] ?? 100) };
   }
   const vis = product.visibility!;
   const rank = await nextRank(ctx, product.family);

@@ -43,7 +43,8 @@ jobs:
           SUPPORT_EMAIL: ${{ vars.SUPPORT_EMAIL }}
           ZOHO_CLIENT_ID: ${{ vars.ZOHO_CLIENT_ID }}
           ZOHO_ACCOUNTS_URL: ${{ vars.ZOHO_ACCOUNTS_URL }}
-          RAZORPAY_KEY_ID: ${{ vars.RAZORPAY_KEY_ID }}
+          # Public by design (it is sent to the checkout), but accepted from either place.
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID || vars.RAZORPAY_KEY_ID }}
           RAZORPAY_INTERNATIONAL: ${{ vars.RAZORPAY_INTERNATIONAL }}
       - name: Deploy
         working-directory: ./api

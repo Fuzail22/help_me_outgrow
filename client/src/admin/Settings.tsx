@@ -191,7 +191,7 @@ function PricingForm({ canEdit }: { canEdit: boolean }) {
       <Money usd label="VAVP1, bundle of 3" value={d.usd.vavp1Bundle3} onChange={(n) => set({ usd: { ...d.usd, vavp1Bundle3: n } })} />
       {d.vavp2.map((p, i) => <Money usd key={i} label={`VAVP2, ${p.items} quotes`} value={d.usd.vavp2[i] ?? 0} onChange={(n) => { const v = [...d.usd.vavp2]; v[i] = n; set({ usd: { ...d.usd, vavp2: v } }); }} />)}
       <Money usd label="VAVP3 private" value={d.usd.vavp3Private} onChange={(n) => set({ usd: { ...d.usd, vavp3Private: n } })} />
-      <Money usd label="VAVP3 public" value={d.usd.vavp3Public} onChange={(n) => set({ usd: { ...d.usd, vavp3Public: n } })} help={`Card fees take a larger share of small payments abroad; ${dollars(99)} is about the smallest sensible price.`} />
+      <Money usd label="VAVP3 public" value={d.usd.vavp3Public} onChange={(n) => set({ usd: { ...d.usd, vavp3Public: n } })} help={`Card fees take a larger share of small payments abroad; ${dollars(100)} is the smallest price Razorpay accepts.`} />
       <SaveBar canEdit={canEdit} save={save} msg={msg} />
     </div>
   );
