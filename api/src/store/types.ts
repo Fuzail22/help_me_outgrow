@@ -29,4 +29,8 @@ export class DuplicateKeyError extends Error {
   }
 }
 
-export interface IndexSpec { keys: string[]; unique?: boolean; ttlSeconds?: number }
+export interface IndexSpec {
+  keys: string[]; unique?: boolean; ttlSeconds?: number;
+  /** Unique only among documents where the (single) key is a string: older documents without it never collide. */
+  uniqueWhenString?: boolean;
+}

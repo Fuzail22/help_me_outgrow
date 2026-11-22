@@ -48,7 +48,8 @@ export interface Collections {
 export interface Store extends Collections { close(): Promise<void> }
 
 export const INDEXES: Record<keyof Collections, IndexSpec[]> = {
-  users: [{ keys: ['email'] }, { keys: ['referralCode'], unique: true }, { keys: ['providers.google'] }, { keys: ['providers.zoho'] }, { keys: ['referredBy.userId'] }],
+  // 0.5 users have no referral code until they are next read (users.ts normaliseUser): unique among those that do.
+  users: [{ keys: ['email'] }, { keys: ['referralCode'], unique: true, uniqueWhenString: true }, { keys: ['providers.google'] }, { keys: ['providers.zoho'] }, { keys: ['referredBy.userId'] }],
   admins: [{ keys: ['email'], unique: true }],
   audit: [{ keys: ['ts'] }],
   settings: [],
@@ -63,3 +64,6 @@ export const INDEXES: Record<keyof Collections, IndexSpec[]> = {
   journalReminders: [],
   waitlist: [{ keys: ['email'], unique: true }],
 };
+
+/** [collection, index name] from older versions, dropped at start-up. */
+export const LEGACY_INDEXES: [keyof Collections, string][] = [['users', 'googleId_1']];
