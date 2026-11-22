@@ -15,6 +15,7 @@ class MemoryCollection<T extends { _id: string }> implements Collection<T> {
     const all = [{ keys: ['_id'], unique: true }, ...this.indexes];
     for (const ix of all) {
       if (!ix.unique) continue;
+      if ((ix as IndexSpec).uniqueWhenString && typeof (doc as any)[ix.keys[0]] !== 'string') continue;
       const k = ix.keys.map((f) => keyPart((doc as any)[f])).join('|');
       for (const other of this.docs.values()) {
         if (other._id === ignoreId) continue;

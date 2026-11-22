@@ -1,6 +1,6 @@
 import { MongoClient, MongoServerError, type Db } from 'mongodb';
 import { DuplicateKeyError, type Collection, type Filter, type FindOptions, type Update } from './types.js';
-import { INDEXES, type Collections, type Store } from './schema.js';
+import { INDEXES, LEGACY_INDEXES, type Collections, type Store } from './schema.js';
 
 function wrap<T extends { _id: string }>(db: Db, name: string): Collection<T> {
   const c = db.collection<any>(name);
@@ -33,13 +33,21 @@ export async function createMongoStore(uri: string): Promise<Store> {
   await client.connect();
   const db = client.db();
   const cols: Record<string, Collection<any>> = {};
+  // Indexes from older versions that would now break inserts (0.5 kept a unique googleId on users; new accounts
+  // created through Zoho or later sign-ins may not have one). Dropped once; a missing index is fine.
+  for (const [name, indexName] of LEGACY_INDEXES) {
+    await db.collection(name).dropIndex(indexName).catch((e) => { if (!/index not found|ns not found|IndexNotFound|NamespaceNotFound/i.test(String(e?.codeName ?? e?.message))) throw e; });
+  }
   for (const [name, specs] of Object.entries(INDEXES)) {
     cols[name] = wrap(db, name);
     for (const s of specs) {
       await db.collection(name).createIndex(
         Object.fromEntries(s.keys.map((k) => [k, 1])),
         // Only pass options that are set: the driver would send `unique: undefined` as null and the server rejects it.
-        { ...(s.unique ? { unique: true } : {}), ...(s.ttlSeconds ? { expireAfterSeconds: s.ttlSeconds } : {}) },
+        {
+          ...(s.unique ? { unique: true } : {}), ...(s.ttlSeconds ? { expireAfterSeconds: s.ttlSeconds } : {}),
+          ...(s.uniqueWhenString ? { partialFilterExpression: { [s.keys[0]]: { $type: 'string' } } } : {}),
+        },
       );
     }
   }
