@@ -91,6 +91,7 @@ export function adminRoutes(ctx: Ctx, api: Router, extend: ((admin: Router, need
       user: { id: u._id, email: u.email, name: u.name, createdAt: u.createdAt, referralCode: u.referralCode, referredBy: u.referredBy ?? null, providers: Object.keys(u.providers ?? {}) },
       entitlements: ents.map((e) => ({ ...e, active: active.has(e._id) })), unlocks, orders, proofs, referrals: { visits, signups },
       journalEntries: await ctx.store.journal.count({ userId: u._id }),
+      groups: (await ctx.store.groups.find({ _id: { $in: (await ctx.store.groupMembers.find({ userId: u._id })).map((m) => m.groupId) } }, { sort: { nameKey: 1 } })).map((g) => ({ id: g._id, name: g.name })),
     });
   }));
   api.post(`${A}/users/:id/entitlements`, need('owner'), h(async (req, res) => {

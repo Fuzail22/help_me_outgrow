@@ -10,6 +10,7 @@ import { growthRoutes, proofAdminRoutes } from './routes/growth.js';
 import { ownTopicRoutes, topicAdminRoutes } from './routes/topics.js';
 import { orderAdminRoutes, upgradeRoutes } from './routes/upgrade.js';
 import { journalAdminRoutes, journalRoutes } from './routes/journal.js';
+import { groupAdminRoutes } from './routes/groups.js';
 
 export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => void } = {}) {
   const { config } = ctx;
@@ -49,7 +50,7 @@ export function createApp(ctx: Ctx, opts: { extra?: (api: express.Router) => voi
   ownTopicRoutes(ctx, api);
   upgradeRoutes(ctx, api);
   journalRoutes(ctx, api);
-  adminRoutes(ctx, api, [proofAdminRoutes(ctx), topicAdminRoutes(ctx), orderAdminRoutes(ctx), journalAdminRoutes(ctx)]);
+  adminRoutes(ctx, api, [proofAdminRoutes(ctx), topicAdminRoutes(ctx), orderAdminRoutes(ctx), journalAdminRoutes(ctx), groupAdminRoutes(ctx)]);
   opts.extra?.(api);
   app.use(api);
 
