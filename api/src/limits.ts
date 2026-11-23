@@ -3,6 +3,7 @@ import type { Entitlement, EntitlementKind, User } from './store/schema.js';
 import type { PlatformTopic, Slot } from './platform.js';
 import { getSettings } from './settings.js';
 import { HttpError } from './http.js';
+import { audienceCheck } from './audience.js';
 
 const DAY_MS = 86400000;
 
@@ -48,13 +49,16 @@ export async function limitsFor(ctx: Ctx, user: User, topics: PlatformTopic[]) {
   };
 }
 
-/** Topics this person may follow: listed public topics, plus their own (VAVP3). The platform does not check this; we do. */
+/**
+ * Topics this person may follow: listed public topics whose audience (G11) includes them, plus their own (VAVP3).
+ * The platform does not check this; we do. Losing access only stops new courses: running ones are left to finish.
+ */
 export async function topicsFor(ctx: Ctx, user: User) {
-  const [all, own, ents] = await Promise.all([ctx.platform.topics(), ctx.store.ownTopics.find({ userId: user._id }), activeEntitlements(ctx, user._id, 'own_topic')]);
+  const [all, own, ents, inAudience] = await Promise.all([ctx.platform.topics(), ctx.store.ownTopics.find({ userId: user._id }), activeEntitlements(ctx, user._id, 'own_topic'), audienceCheck(ctx, user._id)]);
   // Their own topics while the privilege lasts (a public one is usable by them while it waits for review).
   const live = new Set(ents.map((e) => e._id));
   const mine = new Set(own.filter((o) => o.status !== 'rejected' && live.has(o.entitlementId)).map((o) => o.platformTopicId));
-  return all.filter((t) => t.status === 'active' && t.slug !== JOURNAL_TOPIC_SLUG && (mine.has(t._id) || (t.visibility === 'public' && !t.retiredAt)));
+  return all.filter((t) => t.status === 'active' && t.slug !== JOURNAL_TOPIC_SLUG && (mine.has(t._id) || (t.visibility === 'public' && !t.retiredAt && inAudience(t._id))));
 }
 export const JOURNAL_TOPIC_SLUG = 'journal-prompts';
 

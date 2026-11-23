@@ -38,12 +38,22 @@ export interface OwnTopic { _id: Id; userId: Id; platformTopicId: string; title:
 export interface JournalEntry { _id: Id; userId: Id; ts: Date; updatedAt: Date; iv: string; ct: string; tag: string; hasQuote: boolean; hasMood: boolean }
 export interface JournalReminder { _id: Id /* userId */; enrolmentId: string | null; tiedTopicId: string | null; slots: { day: number; time: string }[]; timezone: string; updatedAt: Date }
 export interface Waitlist { _id: Id; email: string; country: string; at: Date }
+/** G11: a named set of people an admin can show topics to. `nameKey` is the lower-cased name (unique). */
+export interface Group { _id: Id; name: string; nameKey: string; description: string; createdAt: Date; createdBy: string; updatedAt: Date }
+/** One person in one group. `_id` is `<groupId>:<userId>`, so adding twice is a no-op. */
+export interface GroupMember { _id: string; groupId: Id; userId: Id; addedAt: Date; addedBy: string }
+/**
+ * G11: who may see a curated topic, kept in this app (the platform's `visibility` is not changed). No document means
+ * public (everyone). `restricted` means only the listed groups' members and the listed people.
+ */
+export interface TopicAudience { _id: string /* platform topic id */; mode: 'public' | 'restricted'; groupIds: Id[]; userIds: Id[]; updatedAt: Date; updatedBy: string }
 
 export interface Collections {
   users: Collection<User>; admins: Collection<AdminUser>; audit: Collection<AuditEntry>; settings: Collection<SettingsDoc>;
   refVisits: Collection<RefVisit>; refProofs: Collection<RefProof>; levelUnlocks: Collection<LevelUnlock>;
   entitlements: Collection<Entitlement>; orders: Collection<Order>; counters: Collection<Counter>; ownTopics: Collection<OwnTopic>;
   journal: Collection<JournalEntry>; journalReminders: Collection<JournalReminder>; waitlist: Collection<Waitlist>;
+  groups: Collection<Group>; groupMembers: Collection<GroupMember>; topicAudiences: Collection<TopicAudience>;
 }
 export interface Store extends Collections { close(): Promise<void> }
 
@@ -63,6 +73,9 @@ export const INDEXES: Record<keyof Collections, IndexSpec[]> = {
   journal: [{ keys: ['userId', 'ts'] }],
   journalReminders: [],
   waitlist: [{ keys: ['email'], unique: true }],
+  groups: [{ keys: ['nameKey'], unique: true }],
+  groupMembers: [{ keys: ['groupId'] }, { keys: ['userId'] }],
+  topicAudiences: [{ keys: ['groupIds'] }, { keys: ['userIds'] }],
 };
 
 /** [collection, index name] from older versions, dropped at start-up. */
