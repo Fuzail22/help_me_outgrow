@@ -201,8 +201,19 @@ applies: a new slug creates the topic (visibility from the file, default private
 and appends only new ones (title, description, sensitive and repeat are updated; private → public is applied,
 public → private is not). Files with errors are skipped whole; the rest import. One audit entry per topic.
 
+**Batching**: the platform accepts request bodies up to 64 KB, so new notes are sent in batches of at most 56 KB of
+JSON and 1000 notes (Tamil and other non-Latin scripts take 3 bytes a character). If a batch fails, the earlier ones
+stay saved and the result says how many; importing the same file again adds only the notes still missing.
+
+**Removing a note** (admin → Topics → a topic): *Remove* (editor, confirm, audited as `line.remove`) retires the
+note on the platform (`POST /v1/topics/:id/items/:itemId/retire`): it is no longer sent, but keeps its place, so
+nobody's position in the course moves; *Restore* brings it back. Notes are never deleted or reordered. A removed note
+still counts as a duplicate, so re-importing its text does not bring it back. *Show likely duplicates only* lists
+both copies of every pair of notes that share the same words or at least 80% of their words.
+
 **Platform**: the content API accepts `clickUrl` on append and edit (https only; `{deliveryId}` and `{token}` may be
-used), so a note's link survives the import.
+used), so a note's link survives the import (notification-service, branch `claude/fervent-mayer-fdlsam`; before it,
+links were silently dropped).
 
 ## G11. Groups and topic audiences (admin → Groups, admin → Topics → a topic)
 

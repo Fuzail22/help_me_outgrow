@@ -80,6 +80,12 @@ export class FakePlatform implements Platform {
     if (!line) throw new PlatformError(404, 'not_found', 'Line not found');
     Object.assign(line, b); return { ...line };
   }
+  async setLineRetired(topicId: string, lineId: string, retired: boolean) {
+    this.calls.push({ method: 'setLineRetired', args: [topicId, lineId, retired] });
+    const line = this.linesBy.get(topicId)?.find((x) => x.id === lineId) as any;
+    if (!line) throw new PlatformError(404, 'not_found', 'Line not found');
+    line.status = retired ? 'retired' : 'active'; return { ...line };
+  }
 }
 
 export function makeCtx(over: Partial<Config> = {}, start = '2026-11-20T06:00:00Z') {

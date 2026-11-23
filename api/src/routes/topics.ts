@@ -106,6 +106,14 @@ export function topicAdminRoutes(ctx: Ctx) {
       await audit(ctx, who(req), 'line.edit', `${req.params.id} #${l.number}`, before ? { body: before.body } : null, { body: l.body });
       res.json(withWarnings(l));
     }));
+    /** Remove a note (it stops sending but keeps its place, so nobody's position in the course moves) or restore it. */
+    for (const [op, retired] of [['remove', true], ['restore', false]] as const) {
+      api.post(`${A}/topics/:id/lines/:lineId/${op}`, need('editor'), h(async (req, res) => {
+        const l = await ctx.platform.setLineRetired(req.params.id, req.params.lineId, retired);
+        await audit(ctx, who(req), `line.${op}`, `${req.params.id} #${l.number}`, null, { body: l.body, status: l.status ?? (retired ? 'retired' : 'active') });
+        res.json(withWarnings(l));
+      }));
+    }
     /** G10: bulk import from a zip of CSVs. `?dryRun=1` previews and saves nothing. Body: the zip (application/zip). */
     api.post(`${A}/topics/import`, express.raw({ type: ['application/zip', 'application/x-zip-compressed', 'application/octet-stream'], limit: '5mb' }), need('editor'), h(async (req, res) => {
       if (!Buffer.isBuffer(req.body) || !req.body.length) throw new HttpError(422, 'invalid_zip', 'Send the zip file as the request body');

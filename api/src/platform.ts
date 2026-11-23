@@ -15,7 +15,7 @@ export interface PlatformTopic {
   _id: string; slug: string; title: string; description: string; visibility: 'public' | 'private'; repeat: boolean;
   itemCount: number; status: 'active' | 'archived'; sensitive: boolean; retiredAt?: string | null; actions?: PlatformAction[] | null;
 }
-export interface PlatformLine { id: string; seq: number; number: number; body: string; attribution: string | null; imageUrl: string | null; clickUrl?: string | null; state: 'live' | 'draft'; actions: PlatformAction[] | null }
+export interface PlatformLine { id: string; seq: number; number: number; body: string; attribution: string | null; imageUrl: string | null; clickUrl?: string | null; state: 'live' | 'draft'; status?: 'active' | 'retired'; actions: PlatformAction[] | null }
 export interface PlatformPolicy { maxPerDay: number; minGapMinutes: number; maxDurationDays: number; browserEnrolments: boolean }
 export interface Summary { delivered: number; opened: number; rated: number; ratedUp: number; ratedDown: number; lastRatedAt: string | null; byTopic: Record<string, { delivered: number; opened: number; rated: number }> }
 export interface DeliveryView { id: string; scheduledFor: string; topic: { title: string; slug: string; sensitive: boolean }; body: string; attribution: string | null }
@@ -37,6 +37,8 @@ export interface Platform {
   lines(topicId: string): Promise<PlatformLine[]>;
   appendLines(topicId: string, lines: { body: string; attribution?: string | null; imageUrl?: string | null; clickUrl?: string | null }[]): Promise<{ created: PlatformLine[]; skip: { row: number; body: string; reason: string }[] }>;
   editLine(topicId: string, lineId: string, body: { body?: string; attribution?: string | null; imageUrl?: string | null }): Promise<PlatformLine>;
+  /** Removes a line from sending (retired: it keeps its place, so nobody's position moves) or restores it. */
+  setLineRetired(topicId: string, lineId: string, retired: boolean): Promise<PlatformLine>;
 }
 
 /** An error the platform answered with; status and code pass through to our own API. */
@@ -78,5 +80,6 @@ export function createPlatform(opts: { url: string; secretKey: string; fetch?: t
     lines: async (topicId) => (await call<{ items: PlatformLine[] }>('GET', `/v1/topics/${encodeURIComponent(topicId)}/items`)).items,
     appendLines: (topicId, lines) => call('POST', `/v1/topics/${encodeURIComponent(topicId)}/items`, { lines }),
     editLine: (topicId, lineId, body) => call('PATCH', `/v1/topics/${encodeURIComponent(topicId)}/items/${encodeURIComponent(lineId)}`, body),
+    setLineRetired: (topicId, lineId, retired) => call('POST', `/v1/topics/${encodeURIComponent(topicId)}/items/${encodeURIComponent(lineId)}/${retired ? 'retire' : 'restore'}`, {}),
   };
 }
